@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 260px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+    
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+    
+    #status {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 16px;
+      min-height: 20px;
+    }
+    
+    #status.recording {
+      color: #ff4444;
+      font-weight: 500;
+    }
+    
+    #timer {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 20px;
+      color: #eee;
+      min-height: 40px;
+    }
+    
+    #btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #4a6cf7;
+      color: white;
+      margin-bottom: 8px;
+    }
+    
+    #btn:hover {
+      background: #5a7cf7;
+      transform: scale(1.02);
+    }
+    
+    #btn:active {
+      transform: scale(0.98);
+    }
+    
+    #btn.recording {
+      background: #ff4444;
+    }
+    
+    #btn.recording:hover {
+      background: #ff5555;
+    }
+    
+    #btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    #reset-btn {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #333;
+      color: #888;
+      margin-top: 4px;
+    }
+    
+    #reset-btn:hover {
+      background: #444;
+      color: #fff;
+    }
+    
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: #555;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    
+    .hint kbd {
+      background: #333;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 ScreenSnap</h1>
+  
+  <div id="status">Ready</div>
+  <div id="timer">00:00</div>
+  
+  <button id="btn">Start Recording</button>
+  <button id="reset-btn">🔄 Reset (if stuck)</button>
+  
+  <div class="hint">
+    💡 Popup 关闭后录制继续<br>
+    Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> to stop
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
