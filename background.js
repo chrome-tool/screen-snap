@@ -12,6 +12,10 @@ chrome.runtime.onStartup.addListener(() => {
   void restoreState();
 });
 
+chrome.action.onClicked.addListener(() => {
+  void openRecorderWindow();
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Background received:', message.action);
 
@@ -59,6 +63,31 @@ async function restoreState() {
   isRecording = Boolean(result[STORAGE_KEY]?.isRecording);
   recordingStartedAt = result[STORAGE_KEY]?.recordingStartedAt || null;
   await updateBadge();
+}
+
+async function openRecorderWindow() {
+  try {
+    const existingWindows = await chrome.windows.getAll({ populate: true });
+    const existingWindow = existingWindows.find((win) => {
+      return win.type === 'popup' && win.tabs?.some((tab) => tab.url?.includes('popup.html'));
+    });
+
+    if (existingWindow) {
+      await chrome.windows.update(existingWindow.id, { focused: true });
+      return;
+    }
+
+    await chrome.windows.create({
+      url: 'popup.html',
+      type: 'popup',
+      width: 320,
+      height: 460,
+      focused: true,
+      state: 'normal'
+    });
+  } catch (error) {
+    console.error('Failed to open recorder window:', error);
+  }
 }
 
 async function setRecordingState(value, startedAt = null) {

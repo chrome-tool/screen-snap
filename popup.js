@@ -6,6 +6,10 @@ const btn = document.getElementById('btn');
 const statusEl = document.getElementById('status');
 const timerEl = document.getElementById('timer');
 const resetBtn = document.getElementById('reset-btn');
+const formatSelect = document.getElementById('format-select');
+const qualitySelect = document.getElementById('quality-select');
+const fpsSelect = document.getElementById('fps-select');
+const dragHandle = document.getElementById('drag-handle');
 
 document.addEventListener('DOMContentLoaded', async () => {
   await refreshStatus();
@@ -13,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!isRecording) {
     timerEl.textContent = '00:00';
   }
+  setupDrag();
 });
 
 btn.addEventListener('click', async () => {
@@ -63,7 +68,12 @@ async function startRecording() {
   statusEl.textContent = 'Requesting screen...';
 
   try {
-    const response = await chrome.runtime.sendMessage({ action: 'start-recording' });
+    const response = await chrome.runtime.sendMessage({
+      action: 'start-recording',
+      format: formatSelect.value,
+      quality: qualitySelect.value,
+      fps: Number(fpsSelect.value)
+    });
     if (response && response.success) {
       isRecording = true;
       startTimer(Date.now());
@@ -147,6 +157,44 @@ function formatTime(totalSeconds) {
   const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
   const secs = String(totalSeconds % 60).padStart(2, '0');
   return `${mins}:${secs}`;
+}
+
+function setupDrag() {
+  if (!dragHandle) return;
+
+  let dragging = false;
+  let startX = 0;
+  let startY = 0;
+
+  dragHandle.addEventListener('mousedown', (event) => {
+    dragging = true;
+    startX = event.clientX;
+    startY = event.clientY;
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (event) => {
+    if (!dragging) return;
+
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    startX = event.clientX;
+    startY = event.clientY;
+
+    chrome.windows.getCurrent((win) => {
+      if (win?.id) {
+        chrome.windows.update(win.id, {
+          left: win.left + dx,
+          top: win.top + dy
+        });
+      }
+    });
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.userSelect = '';
+  });
 }
 
 document.addEventListener('keydown', (e) => {

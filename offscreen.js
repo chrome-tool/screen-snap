@@ -6,7 +6,7 @@ let currentMimeType = 'video/webm';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'start-recording') {
-    startRecording().then(() => sendResponse({ success: true })).catch((error) => sendResponse({ success: false, error: error.message || String(error) }));
+    startRecording(message).then(() => sendResponse({ success: true })).catch((error) => sendResponse({ success: false, error: error.message || String(error) }));
     return true;
   }
 
@@ -16,12 +16,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-function getMimeType() {
+function getMimeType(format = 'webm') {
+  if (format === 'mp4') {
+    return 'video/mp4';
+  }
   const candidates = [
     'video/webm;codecs=vp9,opus',
     'video/webm;codecs=vp8,opus',
-    'video/webm',
-    'video/mp4'
+    'video/webm'
   ];
   for (const candidate of candidates) {
     if (MediaRecorder.isTypeSupported(candidate)) {
@@ -31,16 +33,40 @@ function getMimeType() {
   return 'video/webm';
 }
 
-async function startRecording() {
+function getVideoConstraints(quality = 'medium', fps = 30) {
+  const base = { frameRate: fps, cursor: 'always' };
+  if (quality === 'low') {
+    return { ...base, width: 1280, height: 720 };
+  }
+  if (quality === 'high') {
+    return { ...base, width: 1920, height: 1080 };
+  }
+  return { ...base, width: 1600, height: 900 };
+}
+
+async function startRecording(message = {}) {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') return;
 
+  const format = message.format || 'webm';
+  const quality = message.quality || 'medium';
+  const fps = Number(message.fps || 30);
+
   stream = await navigator.mediaDevices.getDisplayMedia({
-    video: { frameRate: 30, cursor: 'always' },
-    audio: true
+    video: {
+      ...getVideoConstraints(quality, fps),
+      displaySurface: 'monitor',
+      logicalSurface: true
+    },
+    audio: {
+      echoCancellation: false,
+      noiseSuppression: false,
+      sampleRate: 48000
+    },
+    preferCurrentTab: false
   });
 
   recordedChunks = [];
-  currentMimeType = getMimeType();
+  currentMimeType = getMimeType(format);
   mediaRecorder = new MediaRecorder(stream, { mimeType: currentMimeType });
 
   mediaRecorder.ondataavailable = (event) => {
