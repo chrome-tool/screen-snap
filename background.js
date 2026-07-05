@@ -1,34 +1,149 @@
 let isRecording = false;
+let recordingStartedAt = null;
+const STORAGE_KEY = 'screenRecorderState';
 
 console.log('Background service worker started');
+
+chrome.runtime.onInstalled.addListener(() => {
+  void restoreState();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  void restoreState();
+});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Background received:', message.action);
 
   if (message.action === 'start-recording') {
-    isRecording = true;
-    chrome.action.setBadgeText({ text: '●' });
-    chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
-    sendResponse({ success: true });
+    void startRecording(sendResponse);
     return true;
   }
 
   if (message.action === 'stop-recording') {
-    isRecording = false;
-    chrome.action.setBadgeText({ text: '' });
-    sendResponse({ success: true, duration: 0 });
+    void stopRecording(sendResponse);
     return true;
   }
 
   if (message.action === 'get-status') {
-    sendResponse({ isRecording });
-    return false;
+    sendResponse({ isRecording, startedAt: recordingStartedAt });
+    return true;
   }
 
   if (message.action === 'reset-state') {
-    isRecording = false;
-    chrome.action.setBadgeText({ text: '' });
+    void resetState(sendResponse);
+    return true;
+  }
+
+  if (message.action === 'recording-started') {
+    void setRecordingState(true);
     sendResponse({ success: true });
-    return false;
+    return true;
+  }
+
+  if (message.action === 'recording-stopped') {
+    void setRecordingState(false);
+    sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.action === 'recording-error') {
+    void setRecordingState(false);
+    sendResponse({ success: false, error: message.error || 'Recorder error' });
+    return true;
   }
 });
+
+async function restoreState() {
+  const result = await chrome.storage.local.get(STORAGE_KEY);
+  isRecording = Boolean(result[STORAGE_KEY]?.isRecording);
+  recordingStartedAt = result[STORAGE_KEY]?.recordingStartedAt || null;
+  await updateBadge();
+}
+
+async function setRecordingState(value, startedAt = null) {
+  isRecording = Boolean(value);
+  recordingStartedAt = value ? (startedAt ?? recordingStartedAt ?? Date.now()) : null;
+  await chrome.storage.local.set({ [STORAGE_KEY]: { isRecording, recordingStartedAt } });
+  await updateBadge();
+}
+
+async function updateBadge() {
+  if (isRecording) {
+    await chrome.action.setBadgeText({ text: '●' });
+    await chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
+  } else {
+    await chrome.action.setBadgeText({ text: '' });
+  }
+}
+
+async function ensureOffscreen() {
+  const hasDocument = await chrome.offscreen.hasDocument();
+  if (!hasDocument) {
+    await chrome.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: ['BLOBS'],
+      justification: 'Record the screen while the popup is closed.'
+    });
+  }
+}
+
+async function startRecording(sendResponse) {
+  if (isRecording) {
+    sendResponse({ success: false, error: 'Already recording' });
+    return;
+  }
+
+  try {
+    await ensureOffscreen();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const response = await chrome.runtime.sendMessage({ action: 'start-recording', source: 'background' });
+    if (response && response.success) {
+      await setRecordingState(true, Date.now());
+      sendResponse({ success: true });
+    } else {
+      await setRecordingState(false);
+      sendResponse({ success: false, error: response?.error || 'Failed to start recording' });
+    }
+  } catch (error) {
+    console.error('Start recording failed:', error);
+    await setRecordingState(false);
+    sendResponse({ success: false, error: error.message || 'Failed to start recording' });
+  }
+}
+
+async function stopRecording(sendResponse) {
+  if (!isRecording) {
+    await setRecordingState(false);
+    sendResponse({ success: true, duration: 0 });
+    return;
+  }
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const response = await chrome.runtime.sendMessage({ action: 'stop-recording', source: 'background' });
+    if (response && response.success) {
+      await setRecordingState(false);
+      sendResponse({ success: true, duration: response.duration || 0 });
+    } else {
+      await setRecordingState(false);
+      sendResponse({ success: false, error: response?.error || 'Failed to stop recording' });
+    }
+  } catch (error) {
+    console.error('Stop recording failed:', error);
+    await setRecordingState(false);
+    sendResponse({ success: true, duration: 0 });
+  }
+}
+
+async function resetState(sendResponse) {
+  try {
+    await chrome.runtime.sendMessage({ action: 'stop-recording', source: 'background' });
+  } catch (error) {
+    console.warn('Reset stop message failed:', error);
+  }
+  await setRecordingState(false);
+  sendResponse({ success: true });
+}
+
+void restoreState();

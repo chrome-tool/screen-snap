@@ -1,227 +1,119 @@
 let isRecording = false;
 let timerInterval = null;
 let seconds = 0;
-let mediaRecorder = null;
-let recordedChunks = [];
-let stream = null;
-let startTime = null;
-let isProcessingStop = false;
 
 const btn = document.getElementById('btn');
 const statusEl = document.getElementById('status');
 const timerEl = document.getElementById('timer');
 const resetBtn = document.getElementById('reset-btn');
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await refreshStatus();
   updateUI();
-  timerEl.textContent = '00:00';
+  if (!isRecording) {
+    timerEl.textContent = '00:00';
+  }
 });
 
-btn.addEventListener('click', () => {
+btn.addEventListener('click', async () => {
   if (isRecording) {
-    stopRecording();
+    await stopRecording();
   } else {
-    startRecording();
+    await startRecording();
   }
 });
 
 if (resetBtn) {
-  resetBtn.addEventListener('click', () => {
-    resetState();
+  resetBtn.addEventListener('click', async () => {
+    await chrome.runtime.sendMessage({ action: 'reset-state' });
+    isRecording = false;
+    stopTimer();
+    seconds = 0;
+    timerEl.textContent = '00:00';
     statusEl.textContent = '🔄 Reset';
     setTimeout(() => {
       if (!isRecording) statusEl.textContent = 'Ready';
     }, 2000);
+    updateUI();
   });
 }
 
-function resetState() {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    try {
-      mediaRecorder.stop();
-    } catch (e) {
-      console.warn('Stop recorder during reset failed:', e);
+async function refreshStatus() {
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'get-status' });
+    if (response && response.isRecording) {
+      isRecording = true;
+      startTimer(response.startedAt || Date.now());
+      statusEl.textContent = '🔴 Recording';
+    } else {
+      isRecording = false;
+      stopTimer();
+      seconds = 0;
+      statusEl.textContent = 'Ready';
+      timerEl.textContent = '00:00';
     }
+  } catch (error) {
+    console.warn('Failed to refresh recording status:', error);
   }
-
-  if (stream) {
-    try {
-      stream.getTracks().forEach((track) => track.stop());
-    } catch (e) {
-      console.warn('Stop stream during reset failed:', e);
-    }
-    stream = null;
-  }
-
-  stopTimer();
-  isRecording = false;
-  isProcessingStop = false;
-  mediaRecorder = null;
-  recordedChunks = [];
-  startTime = null;
-  seconds = 0;
-  timerEl.textContent = '00:00';
-  btn.disabled = false;
-  btn.textContent = '⏺ Start Recording';
-  btn.className = '';
-  statusEl.className = '';
-  statusEl.textContent = 'Ready';
-}
-
-function getMimeType() {
-  const candidates = [
-    'video/webm;codecs=vp9,opus',
-    'video/webm;codecs=vp8,opus',
-    'video/webm',
-    'video/mp4'
-  ];
-
-  for (const candidate of candidates) {
-    if (window.MediaRecorder && MediaRecorder.isTypeSupported(candidate)) {
-      return candidate;
-    }
-  }
-
-  return 'video/webm';
 }
 
 async function startRecording() {
-  if (isRecording || isProcessingStop) return;
-
   btn.disabled = true;
   btn.textContent = 'Starting...';
   statusEl.textContent = 'Requesting screen...';
 
   try {
-    let audioConstraint = true;
-    let micStream = null;
-
-    try {
-      stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          frameRate: 30,
-          cursor: 'always'
-        },
-        audio: audioConstraint
-      });
-      console.log('Display media stream obtained with audio support');
-    } catch (displayError) {
-      console.warn('System audio capture failed, trying microphone fallback:', displayError);
-      stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          frameRate: 30,
-          cursor: 'always'
-        },
-        audio: false
-      });
-
-      micStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false
-      });
-      const audioTrack = micStream.getAudioTracks()[0];
-      if (audioTrack) {
-        stream.addTrack(audioTrack);
-      }
+    const response = await chrome.runtime.sendMessage({ action: 'start-recording' });
+    if (response && response.success) {
+      isRecording = true;
+      startTimer(Date.now());
+      updateUI();
+      statusEl.textContent = '🔴 Recording';
+    } else {
+      statusEl.textContent = '❌ ' + (response?.error || 'Unknown error');
+      updateUI();
     }
-
-    recordedChunks = [];
-    const mimeType = getMimeType();
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
-
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) recordedChunks.push(event.data);
-    };
-
-    mediaRecorder.onstop = () => {
-      saveVideo();
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        stream = null;
-      }
-      isRecording = false;
-      isProcessingStop = false;
-      mediaRecorder = null;
-    };
-
-    mediaRecorder.onerror = (event) => {
-      console.error('MediaRecorder error:', event);
-      statusEl.textContent = '❌ Recorder error';
-      resetState();
-    };
-
-    mediaRecorder.start(1000);
-    isRecording = true;
-    isProcessingStop = false;
-    startTime = Date.now();
-    updateUI();
-    startTimer();
-    statusEl.textContent = '🔴 Recording';
   } catch (error) {
     console.error('Start recording error:', error);
+    statusEl.textContent = '❌ ' + (error.message || error);
+  } finally {
     btn.disabled = false;
-    btn.textContent = '⏺ Start Recording';
-    statusEl.textContent = '❌ Error: ' + (error.message || error);
-    resetState();
   }
 }
 
-function stopRecording() {
-  if (!isRecording || !mediaRecorder) {
-    resetState();
-    return;
-  }
-
+async function stopRecording() {
   btn.disabled = true;
   btn.textContent = 'Stopping...';
   statusEl.textContent = 'Stopping recording...';
-  isProcessingStop = true;
 
   try {
-    mediaRecorder.stop();
-  } catch (error) {
-    console.error('Stop error:', error);
-    resetState();
-  }
-}
-
-function saveVideo() {
-  if (recordedChunks.length === 0) {
-    statusEl.textContent = '❌ No data';
-    resetState();
-    return;
-  }
-
-  const blob = new Blob(recordedChunks, { type: mediaRecorder?.mimeType || 'video/webm' });
-  const url = URL.createObjectURL(blob);
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const extension = blob.type.includes('mp4') ? 'mp4' : 'webm';
-  const filename = `recording-${timestamp}.${extension}`;
-
-  chrome.downloads.download({
-    url,
-    filename,
-    saveAs: true
-  }, () => {
-    if (chrome.runtime.lastError) {
-      console.error('Download error:', chrome.runtime.lastError);
-      statusEl.textContent = '❌ Download error';
+    const response = await chrome.runtime.sendMessage({ action: 'stop-recording' });
+    if (response && response.success) {
+      isRecording = false;
+      stopTimer();
+      seconds = 0;
+      timerEl.textContent = '00:00';
+      statusEl.textContent = '✅ Saved';
+      setTimeout(() => {
+        if (!isRecording) statusEl.textContent = 'Ready';
+      }, 2000);
+      updateUI();
     } else {
-      statusEl.textContent = '✅ Saved!';
+      statusEl.textContent = '❌ ' + (response?.error || 'Unknown error');
+      updateUI();
     }
-
-    setTimeout(() => {
-      resetState();
-    }, 3000);
-  });
-
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (error) {
+    console.error('Stop recording error:', error);
+    statusEl.textContent = '❌ ' + (error.message || error);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function updateUI() {
   if (isRecording) {
     btn.textContent = '⏹ Stop Recording';
-    btn.className = 'recording';
+    btn.className = 'recording secondary';
     statusEl.className = 'recording';
   } else {
     btn.textContent = '⏺ Start Recording';
@@ -230,8 +122,14 @@ function updateUI() {
   }
 }
 
-function startTimer() {
+function startTimer(startedAt = null) {
   stopTimer();
+  if (startedAt) {
+    seconds = Math.floor((Date.now() - startedAt) / 1000);
+  } else {
+    seconds = 0;
+  }
+  timerEl.textContent = formatTime(seconds);
   timerInterval = setInterval(() => {
     seconds++;
     timerEl.textContent = formatTime(seconds);
@@ -258,11 +156,4 @@ document.addEventListener('keydown', (e) => {
       btn.click();
     }
   }
-});
-
-window.addEventListener('unload', () => {
-  if (stream) {
-    stream.getTracks().forEach((track) => track.stop());
-  }
-  stopTimer();
 });

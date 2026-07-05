@@ -6,7 +6,9 @@
   "permissions": [
     "tabCapture",
     "desktopCapture",
-    "downloads"
+    "downloads",
+    "offscreen",
+    "storage"
   ],
   "background": {
     "service_worker": "background.js"
