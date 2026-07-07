@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScreenSnap - Launcher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      width: 500px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      padding: 32px 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 12px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .status-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #00d084;
+      box-shadow: 0 0 8px rgba(0, 208, 132, 0.6);
+    }
+
+    .status-indicator.recording {
+      background: #ff4444;
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .status-timer {
+      font-size: 16px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: #a8edea;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      transition: left 0.3s;
+      z-index: -1;
+    }
+
+    .btn:hover::before {
+      left: 0;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      color: #1a1a2e;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(168, 237, 234, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(168, 237, 234, 0.35);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.20);
+    }
+
+    .btn-small {
+      flex: 0;
+      padding: 10px 14px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .footer {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .footer-link {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0;
+    }
+
+    .footer-link:hover {
+      color: #a8edea;
+    }
+
+    .version {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .tips {
+      background: rgba(168, 237, 234, 0.08);
+      border-left: 3px solid #a8edea;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+      color: #a8edea;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .tips strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #fed6e3;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="header">
+      <div class="logo">🎬</div>
+      <h1>ScreenSnap</h1>
+      <p class="subtitle">High-quality screen recording at your fingertips</p>
+    </div>
+
+    <div class="content">
+      <!-- Status Box -->
+      <div class="status-box">
+        <div class="status-info">
+          <div class="status-indicator" id="status-indicator"></div>
+          <div class="status-text" id="status-text">Ready to record</div>
+        </div>
+        <div class="status-timer" id="timer">00:00</div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="record-btn">
+          <span id="btn-icon">⏺</span>
+          <span id="btn-text">Start Recording</span>
+        </button>
+        <div class="quick-actions">
+          <button class="btn btn-secondary btn-small" id="settings-btn" title="Settings">⚙️</button>
+          <button class="btn btn-secondary btn-small" id="help-btn" title="Help">ℹ️</button>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="tips">
+        <strong>💡 Pro Tips:</strong>
+        Press <kbd>Ctrl+Shift+V</kbd> to start/stop recording from anywhere<br>
+        Right-click for quick access menu
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <button class="footer-link" id="about-link">About</button>
+      <button class="footer-link" id="keyboard-link">Keyboard Shortcuts</button>
+    </div>
+    <div class="version">v1.0.0</div>
+  </div>
+
+  <script type="module" src="launcher.js"></script>
+</body>
+</html>

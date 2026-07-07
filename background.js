@@ -64,7 +64,7 @@ async function toggleRecording() {
       const duration = result?.duration || 0;
       console.log(`Recording stopped (duration: ${duration}s)`);
       
-      // Notify popup if it's open
+      // Notify popup/launcher if it's open
       try {
         await chrome.runtime.sendMessage({ 
           action: 'recording-stopped', 
@@ -76,15 +76,28 @@ async function toggleRecording() {
         // Ignore - popup might not be open
       }
     } else {
-      const result = await startRecording({
-        format: CONFIG.DEFAULT_FORMAT,
-        quality: CONFIG.DEFAULT_QUALITY,
-        fps: CONFIG.DEFAULT_FPS
-      });
+      // Load user preferences from storage
+      let preferences = {};
+      try {
+        const result = await chrome.storage.local.get(CONFIG.PREFERENCES_KEY);
+        preferences = result[CONFIG.PREFERENCES_KEY] || {};
+      } catch (e) {
+        console.warn('Failed to load preferences:', e);
+      }
+      
+      const recordingOptions = {
+        format: preferences.format || CONFIG.DEFAULT_FORMAT,
+        quality: preferences.quality || CONFIG.DEFAULT_QUALITY,
+        fps: preferences.fps || CONFIG.DEFAULT_FPS
+      };
+      
+      console.log('Starting recording with preferences:', recordingOptions);
+      const result = await startRecording(recordingOptions);
+      
       if (result?.success) {
         console.log('Recording started by hotkey/menu');
         
-        // Notify popup if it's open
+        // Notify popup/launcher if it's open
         try {
           await chrome.runtime.sendMessage({ 
             action: 'recording-started' 
@@ -216,28 +229,83 @@ async function restoreState() {
  * Opens or focuses the recorder window
  * @returns {Promise<void>}
  */
+/**
+ * Opens or focuses the launcher window
+ * Checks if launcher already exists and focuses it, otherwise creates a new one
+ * @returns {Promise<void>}
+ */
 async function openRecorderWindow() {
   try {
-    const existingWindows = await chrome.windows.getAll({ populate: true });
-    const existingWindow = existingWindows.find((win) => {
-      return win.type === 'popup' && win.tabs?.some((tab) => tab.url?.includes('popup.html'));
+    // Get all windows with tabs info
+    const allWindows = await chrome.windows.getAll({ populate: true });
+    
+    console.log(`Checking ${allWindows.length} windows for launcher...`);
+    
+    // Log all windows for debugging
+    allWindows.forEach((win, idx) => {
+      console.log(`Window ${idx}: type=${win.type}, tabs=${win.tabs?.length || 0}`);
+      if (win.tabs && win.tabs.length > 0) {
+        win.tabs.forEach((tab, tabIdx) => {
+          console.log(`  Tab ${tabIdx}: ${tab.url}`);
+        });
+      }
     });
-
-    if (existingWindow) {
-      await chrome.windows.update(existingWindow.id, { focused: true });
-      return;
+    
+    // Find existing launcher window
+    // Check for popup windows containing launcher
+    let existingLauncher = null;
+    for (const win of allWindows) {
+      if (win.type === 'popup' && win.tabs && win.tabs.length > 0) {
+        // Check if any tab is launcher.html (handles various URL formats)
+        const hasLauncher = win.tabs.some(tab => {
+          if (!tab.url) return false;
+          // Check for launcher.html in various URL formats:
+          // - chrome-extension://xxx/launcher.html
+          // - file:///launcher.html
+          // - Just contains launcher.html
+          const isLauncherTab = tab.url.includes('launcher.html') || 
+                               tab.url.endsWith('launcher.html');
+          console.log(`  Checking tab: ${tab.url} -> isLauncher: ${isLauncherTab}`);
+          return isLauncherTab;
+        });
+        
+        if (hasLauncher) {
+          existingLauncher = win;
+          console.log(`Found existing launcher window (ID: ${existingLauncher.id})`);
+          break;
+        }
+      }
     }
 
-    await chrome.windows.create({
-      url: 'popup.html',
+    if (existingLauncher) {
+      console.log(`Focusing existing launcher window (ID: ${existingLauncher.id})`);
+      try {
+        // Focus the existing launcher window
+        await chrome.windows.update(existingLauncher.id, { 
+          focused: true,
+          state: 'normal'
+        });
+        console.log('Successfully focused existing launcher');
+        return;
+      } catch (focusError) {
+        console.error('Failed to focus existing window, may be closed:', focusError);
+        // Window might have been closed, continue to create new one
+      }
+    }
+
+    // No existing launcher found, create a new one
+    console.log('Creating new launcher window');
+    const newWindow = await chrome.windows.create({
+      url: chrome.runtime.getURL('launcher.html'),
       type: 'popup',
-      width: CONFIG.WINDOW_WIDTH,
-      height: CONFIG.WINDOW_HEIGHT,
+      width: 520,
+      height: 620,
       focused: true,
       state: 'normal'
     });
+    console.log(`Created new launcher window (ID: ${newWindow.id})`);
   } catch (error) {
-    console.error('Failed to open recorder window:', error);
+    console.error('Failed to open/focus launcher window:', error);
   }
 }
 

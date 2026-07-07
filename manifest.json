@@ -34,7 +34,6 @@
       "48": "icon.png",
       "128": "icon.png"
     },
-    "default_popup": "popup.html",
     "default_title": "ScreenSnap - Screen Recorder"
   },
   "icons": {
@@ -42,6 +41,7 @@
     "48": "icon.png",
     "128": "icon.png"
   },
+  "options_page": "options.html",
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
   },
