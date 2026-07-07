@@ -1,389 +1,397 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScreenSnap Settings</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScreenSnap Settings</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #e0e0e0;
-      padding: 24px;
-      min-height: 100vh;
-    }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #e0e0e0;
+        padding: 24px;
+        min-height: 100vh;
+      }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
 
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 32px;
-    }
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
 
-    .header-logo {
-      font-size: 32px;
-    }
+      .header-logo {
+        font-size: 32px;
+      }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
 
-    .section {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      backdrop-filter: blur(10px);
-    }
+      .section {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+      }
 
-    .section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #a8edea;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 14px;
-      display: block;
-    }
+      .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #a8edea;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 14px;
+        display: block;
+      }
 
-    .form-group {
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+      .form-group {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
 
-    label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-      color: #ccc;
-      font-weight: 500;
-    }
+      label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #ccc;
+        font-weight: 500;
+      }
 
-    select, input[type="number"] {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
+      select,
+      input[type="number"] {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        padding: 10px 12px;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
 
-    select:hover, input[type="number"]:hover {
-      border-color: rgba(255, 255, 255, 0.30);
-      background: rgba(255, 255, 255, 0.16);
-    }
+      select:hover,
+      input[type="number"]:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.16);
+      }
 
-    select:focus, input[type="number"]:focus {
-      outline: none;
-      border-color: #a8edea;
-      background: rgba(255, 255, 255, 0.16);
-      box-shadow: 0 0 8px rgba(168, 237, 234, 0.2);
-    }
+      select:focus,
+      input[type="number"]:focus {
+        outline: none;
+        border-color: #a8edea;
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: 0 0 8px rgba(168, 237, 234, 0.2);
+      }
 
-    select option {
-      background: #1a1a2e;
-      color: #ffffff;
-      font-size: 14px;
-      padding: 8px;
-    }
+      select option {
+        background: #1a1a2e;
+        color: #ffffff;
+        font-size: 14px;
+        padding: 8px;
+      }
 
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: #a8edea;
-    }
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #a8edea;
+      }
 
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-    .value-display {
-      background: rgba(168, 237, 234, 0.1);
-      border: 1px solid rgba(168, 237, 234, 0.3);
-      color: #a8edea;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-      min-width: 60px;
-      text-align: center;
-    }
+      .value-display {
+        background: rgba(168, 237, 234, 0.1);
+        border: 1px solid rgba(168, 237, 234, 0.3);
+        color: #a8edea;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 60px;
+        text-align: center;
+      }
 
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
 
-    button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+      button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-    .btn-save {
-      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      color: #1a1a2e;
-    }
+      .btn-save {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #1a1a2e;
+      }
 
-    .btn-save:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 16px rgba(168, 237, 234, 0.25);
-    }
+      .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(168, 237, 234, 0.25);
+      }
 
-    .btn-reset {
-      background: rgba(255, 255, 255, 0.08);
-      color: #e0e0e0;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
+      .btn-reset {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e0e0e0;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
 
-    .btn-reset:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
+      .btn-reset:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
 
-    .status-message {
-      font-size: 12px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-      display: none;
-    }
+      .status-message {
+        font-size: 12px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        display: none;
+      }
 
-    .status-message.show {
-      display: block;
-    }
+      .status-message.show {
+        display: block;
+      }
 
-    .status-message.success {
-      background: rgba(0, 208, 132, 0.15);
-      color: #00d084;
-      border: 1px solid rgba(0, 208, 132, 0.3);
-    }
+      .status-message.success {
+        background: rgba(0, 208, 132, 0.15);
+        color: #00d084;
+        border: 1px solid rgba(0, 208, 132, 0.3);
+      }
 
-    .status-message.error {
-      background: rgba(255, 68, 68, 0.15);
-      color: #ff6b6b;
-      border: 1px solid rgba(255, 68, 68, 0.3);
-    }
+      .status-message.error {
+        background: rgba(255, 68, 68, 0.15);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 68, 68, 0.3);
+      }
 
-    .info-box {
-      background: rgba(168, 237, 234, 0.08);
-      border-left: 3px solid #a8edea;
-      border-radius: 6px;
-      padding: 12px;
-      font-size: 12px;
-      color: #a8edea;
-      margin-top: 12px;
-      line-height: 1.6;
-    }
+      .info-box {
+        background: rgba(168, 237, 234, 0.08);
+        border-left: 3px solid #a8edea;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 12px;
+        color: #a8edea;
+        margin-top: 12px;
+        line-height: 1.6;
+      }
 
-    .hint {
-      font-size: 11px;
-      color: #777;
-      margin-top: 6px;
-    }
+      .hint {
+        font-size: 11px;
+        color: #777;
+        margin-top: 6px;
+      }
 
-    .divider {
-      height: 1px;
-      background: rgba(255, 255, 255, 0.08);
-      margin: 16px 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="header-logo">⚙️</div>
-      <h1>Settings</h1>
-    </div>
-
-    <!-- Recording Settings -->
-    <div class="section">
-      <span class="section-title">Recording Settings</span>
-      
-      <div class="form-group">
-        <label>
-          Format
-          <select id="format-select">
-            <option value="webm">WebM (Smaller file size)</option>
-            <option value="mp4">MP4 (Better compatibility)</option>
-          </select>
-        </label>
-        <div class="hint">Choose output video format</div>
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="header-logo">⚙️</div>
+        <h1>Settings</h1>
       </div>
 
-      <div class="form-group">
-        <label>
-          Quality
-          <select id="quality-select">
-            <option value="high">High (1920×1080)</option>
-            <option value="medium" selected>Medium (1600×900)</option>
-            <option value="low">Low (1280×720)</option>
-          </select>
-        </label>
-        <div class="hint">Higher quality = larger file size</div>
+      <!-- Recording Settings -->
+      <div class="section">
+        <span class="section-title">Recording Settings</span>
+
+        <div class="form-group">
+          <label>
+            Format
+            <select id="format-select">
+              <option value="webm">WebM (Smaller file size)</option>
+              <option value="mp4">MP4 (Better compatibility)</option>
+            </select>
+          </label>
+          <div class="hint">Choose output video format</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Quality
+            <select id="quality-select">
+              <option value="high">High (1920×1080)</option>
+              <option value="medium" selected>Medium (1600×900)</option>
+              <option value="low">Low (1280×720)</option>
+            </select>
+          </label>
+          <div class="hint">Higher quality = larger file size</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Frame Rate (FPS)
+            <select id="fps-select">
+              <option value="30" selected>30 FPS</option>
+              <option value="60">60 FPS (Smoother)</option>
+              <option value="120">120 FPS (Very smooth, larger file)</option>
+            </select>
+          </label>
+          <div class="hint">Higher FPS = smoother video, larger file</div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>
-          Frame Rate (FPS)
-          <select id="fps-select">
-            <option value="30" selected>30 FPS</option>
-            <option value="60">60 FPS (Smoother)</option>
-            <option value="120">120 FPS (Very smooth, larger file)</option>
-          </select>
-        </label>
-        <div class="hint">Higher FPS = smoother video, larger file</div>
-      </div>
-    </div>
+      <!-- Audio Settings -->
+      <div class="section">
+        <span class="section-title">Audio Settings</span>
 
-    <!-- Audio Settings -->
-    <div class="section">
-      <span class="section-title">Audio Settings</span>
-      
-      <div class="form-group">
-        <label>
-          <div class="checkbox-group">
-            <input type="checkbox" id="echo-cancellation">
-            <span>Echo Cancellation</span>
+        <div class="form-group">
+          <label>
+            <div class="checkbox-group">
+              <input type="checkbox" id="echo-cancellation" />
+              <span>Echo Cancellation</span>
+            </div>
+          </label>
+          <div class="hint">Reduces background echo during recording</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <div class="checkbox-group">
+              <input type="checkbox" id="noise-suppression" />
+              <span>Noise Suppression</span>
+            </div>
+          </label>
+          <div class="hint">Filters out background noise</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Sample Rate (Hz)
+            <select id="sample-rate-select">
+              <option value="16000">16000 Hz (Low quality)</option>
+              <option value="24000">24000 Hz (Standard)</option>
+              <option value="48000" selected>48000 Hz (High quality)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- Feature Settings -->
+      <div class="section">
+        <span class="section-title">Features</span>
+
+        <div class="form-group">
+          <label>
+            <div class="checkbox-group">
+              <input type="checkbox" id="enable-stats" checked />
+              <span>Show Statistics</span>
+            </div>
+          </label>
+          <div class="hint">Display file size and duration after recording</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <div class="checkbox-group">
+              <input type="checkbox" id="enable-keyboard" checked />
+              <span>Keyboard Shortcuts</span>
+            </div>
+          </label>
+          <div class="hint">Enable global hotkey (Ctrl+Shift+V)</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <div class="checkbox-group">
+              <input type="checkbox" id="enable-pause" checked />
+              <span>Allow Pause/Resume</span>
+            </div>
+          </label>
+          <div class="hint">
+            Pause and resume recording without stopping [Coming Soon]
           </div>
-        </label>
-        <div class="hint">Reduces background echo during recording</div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>
-          <div class="checkbox-group">
-            <input type="checkbox" id="noise-suppression">
-            <span>Noise Suppression</span>
-          </div>
-        </label>
-        <div class="hint">Filters out background noise</div>
+      <!-- Limits -->
+      <div class="section">
+        <span class="section-title">Recording Limits</span>
+
+        <div class="form-group">
+          <label>
+            Max Duration
+            <select id="max-duration">
+              <option value="3600">1 hour</option>
+              <option value="7200" selected>2 hours</option>
+              <option value="14400">4 hours</option>
+              <option value="unlimited">Unlimited</option>
+            </select>
+          </label>
+          <div class="hint">Recording stops automatically at this duration</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Max File Size
+            <select id="max-filesize">
+              <option value="1gb">1 GB</option>
+              <option value="2gb">2 GB</option>
+              <option value="5gb" selected>5 GB</option>
+              <option value="unlimited">Unlimited</option>
+            </select>
+          </label>
+          <div class="hint">Recording stops if file size exceeds limit</div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>
-          Sample Rate (Hz)
-          <select id="sample-rate-select">
-            <option value="16000">16000 Hz (Low quality)</option>
-            <option value="24000">24000 Hz (Standard)</option>
-            <option value="48000" selected>48000 Hz (High quality)</option>
-          </select>
-        </label>
-      </div>
-    </div>
+      <!-- Actions -->
+      <div class="section">
+        <div id="status-message" class="status-message"></div>
 
-    <!-- Feature Settings -->
-    <div class="section">
-      <span class="section-title">Features</span>
-      
-      <div class="form-group">
-        <label>
-          <div class="checkbox-group">
-            <input type="checkbox" id="enable-stats" checked>
-            <span>Show Statistics</span>
-          </div>
-        </label>
-        <div class="hint">Display file size and duration after recording</div>
-      </div>
+        <div class="button-group">
+          <button class="btn-save" id="save-btn">💾 Save Settings</button>
+          <button class="btn-reset" id="reset-btn">↻ Reset to Defaults</button>
+        </div>
 
-      <div class="form-group">
-        <label>
-          <div class="checkbox-group">
-            <input type="checkbox" id="enable-keyboard" checked>
-            <span>Keyboard Shortcuts</span>
-          </div>
-        </label>
-        <div class="hint">Enable global hotkey (Ctrl+Shift+V)</div>
-      </div>
-
-      <div class="form-group">
-        <label>
-          <div class="checkbox-group">
-            <input type="checkbox" id="enable-pause" checked>
-            <span>Allow Pause/Resume</span>
-          </div>
-        </label>
-        <div class="hint">Pause and resume recording without stopping [Coming Soon]</div>
+        <div class="info-box">
+          ✨ Your settings are automatically synced across all instances of
+          ScreenSnap
+        </div>
       </div>
     </div>
 
-    <!-- Limits -->
-    <div class="section">
-      <span class="section-title">Recording Limits</span>
-      
-      <div class="form-group">
-        <label>
-          Max Duration
-          <select id="max-duration">
-            <option value="3600">1 hour</option>
-            <option value="7200" selected>2 hours</option>
-            <option value="14400">4 hours</option>
-            <option value="unlimited">Unlimited</option>
-          </select>
-        </label>
-        <div class="hint">Recording stops automatically at this duration</div>
-      </div>
-
-      <div class="form-group">
-        <label>
-          Max File Size
-          <select id="max-filesize">
-            <option value="1gb">1 GB</option>
-            <option value="2gb">2 GB</option>
-            <option value="5gb" selected>5 GB</option>
-            <option value="unlimited">Unlimited</option>
-          </select>
-        </label>
-        <div class="hint">Recording stops if file size exceeds limit</div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="section">
-      <div id="status-message" class="status-message"></div>
-      
-      <div class="button-group">
-        <button class="btn-save" id="save-btn">💾 Save Settings</button>
-        <button class="btn-reset" id="reset-btn">↻ Reset to Defaults</button>
-      </div>
-
-      <div class="info-box">
-        ✨ Your settings are automatically synced across all instances of ScreenSnap
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="options.js"></script>
-</body>
+    <script type="module" src="options.js"></script>
+  </body>
 </html>

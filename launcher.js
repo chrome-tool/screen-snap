@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js';
-import { sendMessageWithTimeout } from './utils.js';
+import { CONFIG } from "./config.js";
+import { sendMessageWithTimeout } from "./utils.js";
 
 let isRecording = false;
 let timerInterval = null;
@@ -8,25 +8,25 @@ let lastDisplayedTime = null;
 let userPreferences = {};
 
 // DOM elements
-const recordBtn = document.getElementById('record-btn');
-const btnIcon = document.getElementById('btn-icon');
-const btnText = document.getElementById('btn-text');
-const statusIndicator = document.getElementById('status-indicator');
-const statusText = document.getElementById('status-text');
-const timer = document.getElementById('timer');
-const settingsBtn = document.getElementById('settings-btn');
-const helpBtn = document.getElementById('help-btn');
-const aboutLink = document.getElementById('about-link');
-const keyboardLink = document.getElementById('keyboard-link');
+const recordBtn = document.getElementById("record-btn");
+const btnIcon = document.getElementById("btn-icon");
+const btnText = document.getElementById("btn-text");
+const statusIndicator = document.getElementById("status-indicator");
+const statusText = document.getElementById("status-text");
+const timer = document.getElementById("timer");
+const settingsBtn = document.getElementById("settings-btn");
+const helpBtn = document.getElementById("help-btn");
+const aboutLink = document.getElementById("about-link");
+const keyboardLink = document.getElementById("keyboard-link");
 
 /**
  * Initialize launcher on load
  */
-window.addEventListener('load', async () => {
+window.addEventListener("load", async () => {
   await loadPreferences();
   await refreshStatus();
   setupEventListeners();
-  
+
   // Auto-refresh status every 500ms
   setInterval(() => {
     if (!isRecording) {
@@ -44,16 +44,16 @@ async function loadPreferences() {
     userPreferences = result[CONFIG.PREFERENCES_KEY] || {
       format: CONFIG.DEFAULT_FORMAT,
       quality: CONFIG.DEFAULT_QUALITY,
-      fps: CONFIG.DEFAULT_FPS
+      fps: CONFIG.DEFAULT_FPS,
     };
-    console.log('Loaded preferences:', userPreferences);
+    console.log("Loaded preferences:", userPreferences);
   } catch (error) {
-    console.warn('Failed to load preferences:', error);
+    console.warn("Failed to load preferences:", error);
     // Use defaults if load fails
     userPreferences = {
       format: CONFIG.DEFAULT_FORMAT,
       quality: CONFIG.DEFAULT_QUALITY,
-      fps: CONFIG.DEFAULT_FPS
+      fps: CONFIG.DEFAULT_FPS,
     };
   }
 }
@@ -62,11 +62,11 @@ async function loadPreferences() {
  * Setup event listeners
  */
 function setupEventListeners() {
-  recordBtn.addEventListener('click', handleRecordToggle);
-  settingsBtn.addEventListener('click', openSettings);
-  helpBtn.addEventListener('click', openHelp);
-  aboutLink.addEventListener('click', openAbout);
-  keyboardLink.addEventListener('click', openKeyboardShortcuts);
+  recordBtn.addEventListener("click", handleRecordToggle);
+  settingsBtn.addEventListener("click", openSettings);
+  helpBtn.addEventListener("click", openHelp);
+  aboutLink.addEventListener("click", openAbout);
+  keyboardLink.addEventListener("click", openKeyboardShortcuts);
 }
 
 /**
@@ -75,27 +75,27 @@ function setupEventListeners() {
 async function refreshStatus() {
   try {
     const response = await sendMessageWithTimeout(
-      { action: 'get-status' },
-      CONFIG.MESSAGE_TIMEOUT_MS
+      { action: "get-status" },
+      CONFIG.MESSAGE_TIMEOUT_MS,
     );
-    
+
     if (response && response.isRecording) {
       isRecording = true;
       startTimer(response.startedAt || Date.now());
       updateUI();
-      statusIndicator.classList.add('recording');
-      statusText.textContent = '🔴 Recording...';
+      statusIndicator.classList.add("recording");
+      statusText.textContent = "🔴 Recording...";
     } else {
       isRecording = false;
       stopTimer();
       seconds = 0;
-      timer.textContent = '00:00';
+      timer.textContent = "00:00";
       updateUI();
-      statusIndicator.classList.remove('recording');
-      statusText.textContent = 'Ready to record';
+      statusIndicator.classList.remove("recording");
+      statusText.textContent = "Ready to record";
     }
   } catch (error) {
-    console.warn('Failed to refresh status:', error);
+    console.warn("Failed to refresh status:", error);
   }
 }
 
@@ -104,7 +104,7 @@ async function refreshStatus() {
  */
 async function handleRecordToggle() {
   recordBtn.disabled = true;
-  
+
   try {
     if (isRecording) {
       await stopRecording();
@@ -112,7 +112,7 @@ async function handleRecordToggle() {
       await startRecording();
     }
   } catch (error) {
-    console.error('Toggle error:', error);
+    console.error("Toggle error:", error);
   } finally {
     recordBtn.disabled = false;
   }
@@ -123,36 +123,36 @@ async function handleRecordToggle() {
  */
 async function startRecording() {
   recordBtn.disabled = true;
-  btnText.textContent = 'Starting...';
-  
+  btnText.textContent = "Starting...";
+
   try {
     const response = await sendMessageWithTimeout(
       {
-        action: 'start-recording',
+        action: "start-recording",
         format: userPreferences.format || CONFIG.DEFAULT_FORMAT,
         quality: userPreferences.quality || CONFIG.DEFAULT_QUALITY,
-        fps: userPreferences.fps || CONFIG.DEFAULT_FPS
+        fps: userPreferences.fps || CONFIG.DEFAULT_FPS,
       },
-      CONFIG.MESSAGE_TIMEOUT_MS
+      CONFIG.MESSAGE_TIMEOUT_MS,
     );
 
     if (response && response.success) {
       isRecording = true;
       startTimer(Date.now());
       updateUI();
-      statusIndicator.classList.add('recording');
-      statusText.textContent = '🔴 Recording...';
+      statusIndicator.classList.add("recording");
+      statusText.textContent = "🔴 Recording...";
     } else {
-      statusText.textContent = '❌ ' + (response?.error || 'Failed to start');
+      statusText.textContent = "❌ " + (response?.error || "Failed to start");
       setTimeout(() => {
-        statusText.textContent = 'Ready to record';
+        statusText.textContent = "Ready to record";
       }, 2000);
     }
   } catch (error) {
-    console.error('Start recording error:', error);
-    statusText.textContent = '❌ ' + (error.message || 'Failed to start');
+    console.error("Start recording error:", error);
+    statusText.textContent = "❌ " + (error.message || "Failed to start");
     setTimeout(() => {
-      statusText.textContent = 'Ready to record';
+      statusText.textContent = "Ready to record";
     }, 2000);
   } finally {
     recordBtn.disabled = false;
@@ -164,32 +164,32 @@ async function startRecording() {
  */
 async function stopRecording() {
   recordBtn.disabled = true;
-  btnText.textContent = 'Stopping...';
-  
+  btnText.textContent = "Stopping...";
+
   try {
     const response = await sendMessageWithTimeout(
-      { action: 'stop-recording' },
-      CONFIG.MESSAGE_TIMEOUT_MS
+      { action: "stop-recording" },
+      CONFIG.MESSAGE_TIMEOUT_MS,
     );
 
     if (response && response.success) {
       isRecording = false;
       stopTimer();
       seconds = 0;
-      timer.textContent = '00:00';
+      timer.textContent = "00:00";
       updateUI();
-      statusIndicator.classList.remove('recording');
-      statusText.textContent = '✅ Saved successfully';
-      
+      statusIndicator.classList.remove("recording");
+      statusText.textContent = "✅ Saved successfully";
+
       setTimeout(() => {
-        statusText.textContent = 'Ready to record';
+        statusText.textContent = "Ready to record";
       }, 2000);
     } else {
-      statusText.textContent = '❌ ' + (response?.error || 'Failed to stop');
+      statusText.textContent = "❌ " + (response?.error || "Failed to stop");
     }
   } catch (error) {
-    console.error('Stop recording error:', error);
-    statusText.textContent = '❌ ' + (error.message || 'Failed to stop');
+    console.error("Stop recording error:", error);
+    statusText.textContent = "❌ " + (error.message || "Failed to stop");
   } finally {
     recordBtn.disabled = false;
   }
@@ -200,13 +200,15 @@ async function stopRecording() {
  */
 function updateUI() {
   if (isRecording) {
-    btnIcon.textContent = '⏹';
-    btnText.textContent = 'Stop Recording';
-    recordBtn.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)';
+    btnIcon.textContent = "⏹";
+    btnText.textContent = "Stop Recording";
+    recordBtn.style.background =
+      "linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)";
   } else {
-    btnIcon.textContent = '⏺';
-    btnText.textContent = 'Start Recording';
-    recordBtn.style.background = 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)';
+    btnIcon.textContent = "⏺";
+    btnText.textContent = "Start Recording";
+    recordBtn.style.background =
+      "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)";
   }
 }
 
@@ -215,16 +217,16 @@ function updateUI() {
  */
 function startTimer(startedAt = null) {
   stopTimer();
-  
+
   if (startedAt) {
     seconds = Math.floor((Date.now() - startedAt) / 1000);
   } else {
     seconds = 0;
   }
-  
+
   lastDisplayedTime = null;
   updateTimerDisplay();
-  
+
   timerInterval = setInterval(() => {
     seconds++;
     updateTimerDisplay();
@@ -245,10 +247,10 @@ function stopTimer() {
  * Update timer display
  */
 function updateTimerDisplay() {
-  const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const secs = String(seconds % 60).padStart(2, '0');
+  const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const secs = String(seconds % 60).padStart(2, "0");
   const displayTime = `${mins}:${secs}`;
-  
+
   if (displayTime !== lastDisplayedTime) {
     timer.textContent = displayTime;
     lastDisplayedTime = displayTime;
@@ -330,24 +332,24 @@ Menu Shortcuts:
  * Listen for background state changes
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'recording-started') {
+  if (message.action === "recording-started") {
     isRecording = true;
     startTimer(Date.now());
     updateUI();
-    statusIndicator.classList.add('recording');
-    statusText.textContent = '🔴 Recording...';
-  } else if (message.action === 'recording-stopped') {
+    statusIndicator.classList.add("recording");
+    statusText.textContent = "🔴 Recording...";
+  } else if (message.action === "recording-stopped") {
     isRecording = false;
     stopTimer();
     seconds = 0;
-    timer.textContent = '00:00';
+    timer.textContent = "00:00";
     updateUI();
-    statusIndicator.classList.remove('recording');
-    statusText.textContent = '✅ Saved successfully';
-    
+    statusIndicator.classList.remove("recording");
+    statusText.textContent = "✅ Saved successfully";
+
     setTimeout(() => {
       if (!isRecording) {
-        statusText.textContent = 'Ready to record';
+        statusText.textContent = "Ready to record";
       }
     }, 2000);
   }

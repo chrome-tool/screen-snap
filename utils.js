@@ -1,5 +1,5 @@
 // Utility functions for Screen Snap extension
-import { CONFIG } from './config.js';
+import { CONFIG } from "./config.js";
 
 /**
  * Validates if a MIME type is supported by the browser
@@ -25,7 +25,7 @@ export function isValidQuality(quality) {
  * @returns {boolean} True if valid, false otherwise
  */
 export function isValidFormat(format) {
-  return ['webm', 'mp4'].includes(format);
+  return ["webm", "mp4"].includes(format);
 }
 
 /**
@@ -43,7 +43,10 @@ export function isValidFPS(fps) {
  * @param {number} timeout - Timeout in milliseconds
  * @returns {Promise<Object>} The response from the receiver
  */
-export function sendMessageWithTimeout(message, timeout = CONFIG.MESSAGE_TIMEOUT_MS) {
+export function sendMessageWithTimeout(
+  message,
+  timeout = CONFIG.MESSAGE_TIMEOUT_MS,
+) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       reject(new Error(CONFIG.ERRORS.MESSAGE_TIMEOUT));
@@ -66,8 +69,8 @@ export function sendMessageWithTimeout(message, timeout = CONFIG.MESSAGE_TIMEOUT
  * @returns {string} Formatted time string
  */
 export function formatTime(totalSeconds) {
-  const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-  const secs = String(totalSeconds % 60).padStart(2, '0');
+  const mins = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const secs = String(totalSeconds % 60).padStart(2, "0");
   return `${mins}:${secs}`;
 }
 
@@ -77,11 +80,11 @@ export function formatTime(totalSeconds) {
  * @returns {string} Formatted size string
  */
 export function formatFileSize(bytes) {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return "0 B";
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 /**
@@ -90,7 +93,7 @@ export function formatFileSize(bytes) {
  * @returns {string} Generated filename
  */
 export function generateFilename(extension) {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   return `recording-${timestamp}.${extension}`;
 }
 
@@ -113,7 +116,7 @@ export function isValidBlob(blob) {
  */
 export function throttle(func, interval) {
   let lastRun = 0;
-  return function(...args) {
+  return function (...args) {
     const now = Date.now();
     if (now - lastRun >= interval) {
       lastRun = now;
@@ -130,7 +133,7 @@ export function throttle(func, interval) {
  */
 export function debounce(func, delay) {
   let timeoutId;
-  return function(...args) {
+  return function (...args) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func.apply(this, args), delay);
   };
@@ -159,7 +162,7 @@ export function cleanupResources(options = {}) {
   if (options.listeners) {
     // Listers cleanup handled by component
   }
-  
+
   // Clear timers if needed
   if (options.timers) {
     // Timers cleanup handled by component
@@ -176,7 +179,7 @@ export function safeJsonParse(jsonString, fallback = null) {
   try {
     return JSON.parse(jsonString);
   } catch (error) {
-    console.error('JSON parse error:', error);
+    console.error("JSON parse error:", error);
     return fallback;
   }
 }

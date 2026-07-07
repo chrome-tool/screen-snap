@@ -1,7 +1,7 @@
-import { CONFIG, RUNTIME } from './config.js';
-import { sendMessageWithTimeout } from './utils.js';
+import { CONFIG, RUNTIME } from "./config.js";
+import { sendMessageWithTimeout } from "./utils.js";
 
-console.log('Background service worker started');
+console.log("Background service worker started");
 
 // Prevent concurrent window opening operations
 let isOpeningWindow = false;
@@ -38,14 +38,14 @@ chrome.windows.onRemoved.addListener((windowId) => {
 async function setupContextMenu() {
   try {
     await chrome.contextMenus.removeAll();
-    
+
     chrome.contextMenus.create({
-      id: 'toggle-recording',
-      title: '🎬 Start Recording',
-      contexts: ['all']
+      id: "toggle-recording",
+      title: "🎬 Start Recording",
+      contexts: ["all"],
     });
   } catch (error) {
-    console.error('Failed to setup context menu:', error);
+    console.error("Failed to setup context menu:", error);
   }
 }
 
@@ -53,7 +53,7 @@ async function setupContextMenu() {
  * Handle keyboard shortcuts
  */
 chrome.commands.onCommand.addListener((command) => {
-  if (command === 'toggle-recording') {
+  if (command === "toggle-recording") {
     void toggleRecording();
   }
 });
@@ -62,7 +62,7 @@ chrome.commands.onCommand.addListener((command) => {
  * Handle context menu clicks
  */
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'toggle-recording') {
+  if (info.menuItemId === "toggle-recording") {
     void toggleRecording();
   }
 });
@@ -78,15 +78,17 @@ async function toggleRecording() {
       const result = await stopRecording();
       const duration = result?.duration || 0;
       console.log(`Recording stopped (duration: ${duration}s)`);
-      
+
       // Notify popup/launcher if it's open
       try {
-        await chrome.runtime.sendMessage({ 
-          action: 'recording-stopped', 
-          duration 
-        }).catch(() => {
-          // Popup not open, that's ok
-        });
+        await chrome.runtime
+          .sendMessage({
+            action: "recording-stopped",
+            duration,
+          })
+          .catch(() => {
+            // Popup not open, that's ok
+          });
       } catch (e) {
         // Ignore - popup might not be open
       }
@@ -97,35 +99,37 @@ async function toggleRecording() {
         const result = await chrome.storage.local.get(CONFIG.PREFERENCES_KEY);
         preferences = result[CONFIG.PREFERENCES_KEY] || {};
       } catch (e) {
-        console.warn('Failed to load preferences:', e);
+        console.warn("Failed to load preferences:", e);
       }
-      
+
       const recordingOptions = {
         format: preferences.format || CONFIG.DEFAULT_FORMAT,
         quality: preferences.quality || CONFIG.DEFAULT_QUALITY,
-        fps: preferences.fps || CONFIG.DEFAULT_FPS
+        fps: preferences.fps || CONFIG.DEFAULT_FPS,
       };
-      
-      console.log('Starting recording with preferences:', recordingOptions);
+
+      console.log("Starting recording with preferences:", recordingOptions);
       const result = await startRecording(recordingOptions);
-      
+
       if (result?.success) {
-        console.log('Recording started by hotkey/menu');
-        
+        console.log("Recording started by hotkey/menu");
+
         // Notify popup/launcher if it's open
         try {
-          await chrome.runtime.sendMessage({ 
-            action: 'recording-started' 
-          }).catch(() => {});
+          await chrome.runtime
+            .sendMessage({
+              action: "recording-started",
+            })
+            .catch(() => {});
         } catch (e) {
           // Ignore - popup might not be open
         }
       } else {
-        console.warn('Failed to start recording:', result?.error);
+        console.warn("Failed to start recording:", result?.error);
       }
     }
   } catch (error) {
-    console.error('Toggle recording error:', error);
+    console.error("Toggle recording error:", error);
   }
 }
 
@@ -138,42 +142,42 @@ async function toggleRecording() {
 
 /** @type {Object<string, MessageHandler>} */
 const messageHandlers = {
-  'start-recording': {
+  "start-recording": {
     handler: startRecording,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'stop-recording': {
+  "stop-recording": {
     handler: stopRecording,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'get-status': {
+  "get-status": {
     handler: getStatus,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'reset-state': {
+  "reset-state": {
     handler: resetState,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'recording-started': {
+  "recording-started": {
     handler: handleRecordingStarted,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'recording-stopped': {
+  "recording-stopped": {
     handler: handleRecordingStopped,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'recording-error': {
+  "recording-error": {
     handler: handleRecordingError,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'get-preferences': {
+  "get-preferences": {
     handler: getPreferences,
-    requiresResponse: true
+    requiresResponse: true,
   },
-  'save-preferences': {
+  "save-preferences": {
     handler: savePreferences,
-    requiresResponse: true
-  }
+    requiresResponse: true,
+  },
 };
 
 /**
@@ -181,48 +185,50 @@ const messageHandlers = {
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Handle recording completion from offscreen (e.g., user clicked "Stop share")
-  if (message.action === 'recording-completed') {
-    console.log('Recording completed (stream ended or finalized)');
-    
+  if (message.action === "recording-completed") {
+    console.log("Recording completed (stream ended or finalized)");
+
     // Ensure recording state is marked as false
     if (RUNTIME.isRecording) {
       void setRecordingState(false);
     }
-    
+
     // Notify popup to stop timer
     try {
-      chrome.runtime.sendMessage({ 
-        action: 'recording-stopped',
-        duration: RUNTIME.recordingStartedAt 
-          ? Math.floor((Date.now() - RUNTIME.recordingStartedAt) / 1000)
-          : 0
-      }).catch(() => {});
+      chrome.runtime
+        .sendMessage({
+          action: "recording-stopped",
+          duration: RUNTIME.recordingStartedAt
+            ? Math.floor((Date.now() - RUNTIME.recordingStartedAt) / 1000)
+            : 0,
+        })
+        .catch(() => {});
     } catch (e) {
       // Popup might not be open
     }
-    
+
     return true; // Prevent other listeners from handling this message
   }
   return false; // Allow other listeners to handle other messages
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Background received:', message.action);
+  console.log("Background received:", message.action);
 
   const handler = messageHandlers[message.action];
   if (!handler) {
-    console.warn('Unknown message action:', message.action);
+    console.warn("Unknown message action:", message.action);
     return false;
   }
 
   if (handler.requiresResponse) {
     Promise.resolve(handler.handler(message))
-      .then(result => sendResponse(result))
-      .catch(error => {
-        console.error('Handler error:', error);
-        sendResponse({ 
-          success: false, 
-          error: error.message || 'Handler error' 
+      .then((result) => sendResponse(result))
+      .catch((error) => {
+        console.error("Handler error:", error);
+        sendResponse({
+          success: false,
+          error: error.message || "Handler error",
         });
       });
     return true;
@@ -237,7 +243,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function restoreState() {
   const result = await chrome.storage.local.get(CONFIG.STORAGE_KEY);
   RUNTIME.isRecording = Boolean(result[CONFIG.STORAGE_KEY]?.isRecording);
-  RUNTIME.recordingStartedAt = result[CONFIG.STORAGE_KEY]?.recordingStartedAt || null;
+  RUNTIME.recordingStartedAt =
+    result[CONFIG.STORAGE_KEY]?.recordingStartedAt || null;
   await updateBadge();
 }
 
@@ -253,88 +260,99 @@ async function restoreState() {
 async function openRecorderWindow() {
   // Prevent concurrent window opening (quick double clicks)
   if (isOpeningWindow) {
-    console.log('Window opening already in progress, ignoring duplicate request');
+    console.log(
+      "Window opening already in progress, ignoring duplicate request",
+    );
     return;
   }
-  
+
   isOpeningWindow = true;
-  
+
   try {
     // First, check if we have a saved launcher window ID and if it's still valid
     if (launcherWindowId !== null) {
       try {
         const window = await chrome.windows.get(launcherWindowId);
         if (window) {
-          console.log(`Launcher window still exists (ID: ${launcherWindowId}), focusing it`);
+          console.log(
+            `Launcher window still exists (ID: ${launcherWindowId}), focusing it`,
+          );
           await chrome.windows.update(launcherWindowId, {
             focused: true,
-            state: 'normal'
+            state: "normal",
           });
-          console.log('Successfully focused existing launcher window');
+          console.log("Successfully focused existing launcher window");
           return;
         }
       } catch (error) {
-        console.log(`Saved window ID ${launcherWindowId} is no longer valid:`, error.message);
+        console.log(
+          `Saved window ID ${launcherWindowId} is no longer valid:`,
+          error.message,
+        );
         launcherWindowId = null;
       }
     }
 
     // If we don't have a valid saved ID, search through all windows
-    console.log('Searching for launcher window in all open windows...');
+    console.log("Searching for launcher window in all open windows...");
     const allWindows = await chrome.windows.getAll({ populate: true });
-    
+
     console.log(`Checking ${allWindows.length} windows for launcher...`);
-    
+
     let existingLauncher = null;
     for (const win of allWindows) {
-      if (win.type === 'popup' && win.tabs && win.tabs.length > 0) {
-        const hasLauncher = win.tabs.some(tab => {
+      if (win.type === "popup" && win.tabs && win.tabs.length > 0) {
+        const hasLauncher = win.tabs.some((tab) => {
           if (!tab.url) return false;
-          const isLauncherTab = tab.url.includes('launcher.html');
+          const isLauncherTab = tab.url.includes("launcher.html");
           if (isLauncherTab) {
             console.log(`Found launcher in tab: ${tab.url}`);
           }
           return isLauncherTab;
         });
-        
+
         if (hasLauncher) {
           existingLauncher = win;
-          console.log(`Found existing launcher window (ID: ${existingLauncher.id})`);
+          console.log(
+            `Found existing launcher window (ID: ${existingLauncher.id})`,
+          );
           break;
         }
       }
     }
 
     if (existingLauncher) {
-      console.log(`Focusing existing launcher window (ID: ${existingLauncher.id})`);
+      console.log(
+        `Focusing existing launcher window (ID: ${existingLauncher.id})`,
+      );
       launcherWindowId = existingLauncher.id;
-      await chrome.windows.update(existingLauncher.id, { 
+      await chrome.windows.update(existingLauncher.id, {
         focused: true,
-        state: 'normal'
+        state: "normal",
       });
-      console.log('Successfully focused existing launcher');
+      console.log("Successfully focused existing launcher");
       return;
     }
 
     // No existing launcher found, create a new one
-    console.log('No launcher window found, creating new one...');
+    console.log("No launcher window found, creating new one...");
     const newWindow = await chrome.windows.create({
-      url: chrome.runtime.getURL('launcher.html'),
-      type: 'popup',
+      url: chrome.runtime.getURL("launcher.html"),
+      type: "popup",
       width: 520,
       height: 620,
       focused: true,
-      state: 'normal'
+      state: "normal",
     });
-    
+
     if (newWindow && newWindow.id) {
       launcherWindowId = newWindow.id;
       console.log(`Created new launcher window (ID: ${newWindow.id})`);
     } else {
-      console.error('Failed to get window ID from created window');
+      console.error("Failed to get window ID from created window");
     }
   } catch (error) {
-    console.error('Failed to open/focus launcher window:', error);
+    console.error("Failed to open/focus launcher window:", error);
   } finally {
     isOpeningWindow = false;
   }
@@ -348,12 +366,14 @@ async function openRecorderWindow() {
  */
 async function setRecordingState(value, startedAt = null) {
   RUNTIME.isRecording = Boolean(value);
-  RUNTIME.recordingStartedAt = value ? (startedAt ?? RUNTIME.recordingStartedAt ?? Date.now()) : null;
-  await chrome.storage.local.set({ 
-    [CONFIG.STORAGE_KEY]: { 
-      isRecording: RUNTIME.isRecording, 
-      recordingStartedAt: RUNTIME.recordingStartedAt 
-    } 
+  RUNTIME.recordingStartedAt = value
+    ? (startedAt ?? RUNTIME.recordingStartedAt ?? Date.now())
+    : null;
+  await chrome.storage.local.set({
+    [CONFIG.STORAGE_KEY]: {
+      isRecording: RUNTIME.isRecording,
+      recordingStartedAt: RUNTIME.recordingStartedAt,
+    },
   });
   await updateBadge();
 }
@@ -364,10 +384,10 @@ async function setRecordingState(value, startedAt = null) {
  */
 async function updateBadge() {
   if (RUNTIME.isRecording) {
-    await chrome.action.setBadgeText({ text: '●' });
-    await chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
+    await chrome.action.setBadgeText({ text: "●" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
   } else {
-    await chrome.action.setBadgeText({ text: '' });
+    await chrome.action.setBadgeText({ text: "" });
   }
 }
 
@@ -381,13 +401,13 @@ async function ensureOffscreen() {
     const hasDocument = await chrome.offscreen.hasDocument();
     if (!hasDocument) {
       await chrome.offscreen.createDocument({
-        url: 'offscreen.html',
-        reasons: ['BLOBS'],
-        justification: 'Record the screen while the popup is closed.'
+        url: "offscreen.html",
+        reasons: ["BLOBS"],
+        justification: "Record the screen while the popup is closed.",
       });
     }
   } catch (error) {
-    console.error('Failed to ensure offscreen document:', error);
+    console.error("Failed to ensure offscreen document:", error);
     throw new Error(CONFIG.ERRORS.OFFSCREEN_UNAVAILABLE);
   }
 }
@@ -405,29 +425,35 @@ async function startRecording(message = {}) {
   try {
     await ensureOffscreen();
     await new Promise((resolve) => setTimeout(resolve, CONFIG.DELAY_MS));
-    
+
     const response = await sendMessageWithTimeout(
-      { 
-        action: 'start-recording', 
-        source: 'background',
+      {
+        action: "start-recording",
+        source: "background",
         format: message.format,
         quality: message.quality,
-        fps: message.fps
+        fps: message.fps,
       },
-      CONFIG.MESSAGE_TIMEOUT_MS
+      CONFIG.MESSAGE_TIMEOUT_MS,
     );
-    
+
     if (response && response.success) {
       await setRecordingState(true, Date.now());
       return { success: true };
     } else {
       await setRecordingState(false);
-      return { success: false, error: response?.error || CONFIG.ERRORS.FAILED_START };
+      return {
+        success: false,
+        error: response?.error || CONFIG.ERRORS.FAILED_START,
+      };
     }
   } catch (error) {
-    console.error('Start recording failed:', error);
+    console.error("Start recording failed:", error);
     await setRecordingState(false);
-    return { success: false, error: error.message || CONFIG.ERRORS.FAILED_START };
+    return {
+      success: false,
+      error: error.message || CONFIG.ERRORS.FAILED_START,
+    };
   }
 }
 
@@ -444,21 +470,24 @@ async function stopRecording(message = {}) {
 
   try {
     await new Promise((resolve) => setTimeout(resolve, CONFIG.DELAY_MS));
-    
+
     const response = await sendMessageWithTimeout(
-      { action: 'stop-recording', source: 'background' },
-      CONFIG.MESSAGE_TIMEOUT_MS
+      { action: "stop-recording", source: "background" },
+      CONFIG.MESSAGE_TIMEOUT_MS,
     );
-    
+
     if (response && response.success) {
       await setRecordingState(false);
       return { success: true, duration: response.duration || 0 };
     } else {
       await setRecordingState(false);
-      return { success: false, error: response?.error || CONFIG.ERRORS.FAILED_STOP };
+      return {
+        success: false,
+        error: response?.error || CONFIG.ERRORS.FAILED_STOP,
+      };
     }
   } catch (error) {
-    console.error('Stop recording failed:', error);
+    console.error("Stop recording failed:", error);
     await setRecordingState(false);
     return { success: true, duration: 0 };
   }
@@ -471,7 +500,7 @@ async function stopRecording(message = {}) {
 async function getStatus() {
   return {
     isRecording: RUNTIME.isRecording,
-    startedAt: RUNTIME.recordingStartedAt
+    startedAt: RUNTIME.recordingStartedAt,
   };
 }
 
@@ -482,13 +511,13 @@ async function getStatus() {
 async function resetState() {
   try {
     await sendMessageWithTimeout(
-      { action: 'stop-recording', source: 'background' },
-      CONFIG.MESSAGE_TIMEOUT_MS
+      { action: "stop-recording", source: "background" },
+      CONFIG.MESSAGE_TIMEOUT_MS,
     ).catch(() => {
-      console.warn('Reset stop message failed');
+      console.warn("Reset stop message failed");
     });
   } catch (error) {
-    console.warn('Reset error:', error);
+    console.warn("Reset error:", error);
   }
   await setRecordingState(false);
   return { success: true };
@@ -519,7 +548,7 @@ async function handleRecordingStopped() {
  */
 async function handleRecordingError(message = {}) {
   await setRecordingState(false);
-  return { success: false, error: message.error || 'Recorder error' };
+  return { success: false, error: message.error || "Recorder error" };
 }
 
 /**
@@ -528,11 +557,13 @@ async function handleRecordingError(message = {}) {
  */
 async function getPreferences() {
   const result = await chrome.storage.local.get(CONFIG.PREFERENCES_KEY);
-  return result[CONFIG.PREFERENCES_KEY] || {
-    format: CONFIG.DEFAULT_FORMAT,
-    quality: CONFIG.DEFAULT_QUALITY,
-    fps: CONFIG.DEFAULT_FPS
-  };
+  return (
+    result[CONFIG.PREFERENCES_KEY] || {
+      format: CONFIG.DEFAULT_FORMAT,
+      quality: CONFIG.DEFAULT_QUALITY,
+      fps: CONFIG.DEFAULT_FPS,
+    }
+  );
 }
 
 /**
@@ -544,7 +575,7 @@ async function savePreferences(message = {}) {
   const prefs = {
     format: message.format || CONFIG.DEFAULT_FORMAT,
     quality: message.quality || CONFIG.DEFAULT_QUALITY,
-    fps: message.fps || CONFIG.DEFAULT_FPS
+    fps: message.fps || CONFIG.DEFAULT_FPS,
   };
   await chrome.storage.local.set({ [CONFIG.PREFERENCES_KEY]: prefs });
   RUNTIME.userPreferences = prefs;

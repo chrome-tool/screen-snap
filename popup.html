@@ -1,314 +1,321 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    html {
-      width: 700px;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      width: 100%;
-      min-height: 420px;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #e0e0e0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        width: 700px;
+      }
 
-    .window-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      cursor: move;
-      user-select: none;
-      font-size: 13px;
-      font-weight: 600;
-      color: #a8edea;
-    }
-    
-    h1 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      text-align: center;
-      background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.5px;
-    }
-    
-    #status {
-      text-align: center;
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 12px;
-      min-height: 20px;
-      transition: all 0.2s;
-    }
-    
-    #status.recording {
-      color: #ff6b6b;
-      font-weight: 600;
-      animation: pulse-text 1s ease-in-out infinite;
-    }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    @keyframes pulse-text {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
+      body {
+        width: 100%;
+        min-height: 420px;
+        padding: 20px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #e0e0e0;
+      }
 
-    #status.warning {
-      color: #ffd93d;
-      font-weight: 500;
-    }
+      .window-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        cursor: move;
+        user-select: none;
+        font-size: 13px;
+        font-weight: 600;
+        color: #a8edea;
+      }
 
-    #status.error {
-      color: #ff6b6b;
-      font-weight: 500;
-    }
-    
-    #timer {
-      text-align: center;
-      font-size: 32px;
-      font-weight: 300;
-      font-variant-numeric: tabular-nums;
-      margin-bottom: 24px;
-      color: #a8edea;
-      min-height: 40px;
-      letter-spacing: 2px;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+        background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+      }
 
-    #btn {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      color: #1a1a2e;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(168, 237, 234, 0.2);
-    }
+      #status {
+        text-align: center;
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 12px;
+        min-height: 20px;
+        transition: all 0.2s;
+      }
 
-    #btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.2);
-      transition: left 0.3s;
-    }
+      #status.recording {
+        color: #ff6b6b;
+        font-weight: 600;
+        animation: pulse-text 1s ease-in-out infinite;
+      }
 
-    #btn:hover::before {
-      left: 0;
-    }
+      @keyframes pulse-text {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
 
-    #btn.recording {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
-      color: white;
-      box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
-    }
-    
-    #btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(168, 237, 234, 0.35);
-    }
+      #status.warning {
+        color: #ffd93d;
+        font-weight: 500;
+      }
 
-    #btn.recording:hover:not(:disabled) {
-      box-shadow: 0 12px 32px rgba(255, 107, 107, 0.4);
-    }
-    
-    #btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
-    
-    #btn:disabled, #reset-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    #reset-btn {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: rgba(255, 255, 255, 0.06);
-      color: #888;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-    
-    #reset-btn:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.10);
-      color: #a8edea;
-      border-color: rgba(255, 255, 255, 0.20);
-    }
+      #status.error {
+        color: #ff6b6b;
+        font-weight: 500;
+      }
 
-    .settings {
-      margin-bottom: 16px;
-      display: grid;
-      gap: 10px;
-      font-size: 12px;
-      color: #ccc;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
+      #timer {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 300;
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 24px;
+        color: #a8edea;
+        min-height: 40px;
+        letter-spacing: 2px;
+      }
 
-    .settings label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
 
-    .settings select {
-      flex: 1;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.06);
-      color: #e0e0e0;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
+      #btn {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #1a1a2e;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(168, 237, 234, 0.2);
+      }
 
-    .settings select:hover {
-      background: rgba(255, 255, 255, 0.10);
-      border-color: rgba(255, 255, 255, 0.20);
-    }
+      #btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s;
+      }
 
-    .settings select:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .hint {
-      text-align: center;
-      font-size: 11px;
-      color: #666;
-      margin-top: 12px;
-      line-height: 1.6;
-    }
-    
-    .hint kbd {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      color: #a8edea;
-      border: 1px solid rgba(168, 237, 234, 0.2);
-    }
+      #btn:hover::before {
+        left: 0;
+      }
 
-    #permission-warning {
-      display: none;
-      background: rgba(255, 107, 107, 0.1);
-      border: 1px solid rgba(255, 107, 107, 0.3);
-      border-left: 3px solid #ff6b6b;
-      border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 12px;
-      font-size: 12px;
-      color: #ff8787;
-    }
+      #btn.recording {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+        color: white;
+        box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+      }
 
-    #permission-warning.show {
-      display: block;
-    }
+      #btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(168, 237, 234, 0.35);
+      }
 
-    #stats {
-      display: none;
-      background: rgba(168, 237, 234, 0.08);
-      border: 1px solid rgba(168, 237, 234, 0.2);
-      border-left: 3px solid #a8edea;
-      border-radius: 6px;
-      padding: 10px;
-      margin-top: 12px;
-      font-size: 12px;
-      color: #a8edea;
-      text-align: center;
-    }
+      #btn.recording:hover:not(:disabled) {
+        box-shadow: 0 12px 32px rgba(255, 107, 107, 0.4);
+      }
 
-    #stats.show {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <div class="window-header" id="drag-handle">🎬 Screen Recorder</div>
-  <h1>🎬 Quick Settings</h1>
-  
-  <div id="permission-warning">⚠️ Missing screen capture permissions</div>
-  
-  <div id="status">Ready</div>
-  <div id="timer">00:00</div>
+      #btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
 
-  <div class="settings">
-    <label>
-      Format
-      <select id="format-select">
-        <option value="webm">WebM</option>
-        <option value="mp4">MP4</option>
-      </select>
-    </label>
-    <label>
-      Quality
-      <select id="quality-select">
-        <option value="high">High</option>
-        <option value="medium" selected>Medium</option>
-        <option value="low">Low</option>
-      </select>
-    </label>
-    <label>
-      FPS
-      <select id="fps-select">
-        <option value="30" selected>30</option>
-        <option value="60">60</option>
-        <option value="120">120</option>
-      </select>
-    </label>
-  </div>
-  
-  <div class="button-group">
-    <button id="btn">⏺ Start Recording</button>
-  </div>
-  <button id="reset-btn">🔄 Reset (if stuck)</button>
+      #btn:disabled,
+      #reset-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
 
-  <div id="stats"></div>
-  
-  <div class="hint">
-    💡 Close this popup while recording - it continues in the background<br>
-    Use <kbd>Ctrl+Shift+V</kbd> anytime for quick control
-  </div>
+      #reset-btn {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.06);
+        color: #888;
+        margin-bottom: 12px;
+        font-weight: 500;
+      }
 
-  <script type="module" src="popup.js"></script>
-</body>
+      #reset-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+        color: #a8edea;
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .settings {
+        margin-bottom: 16px;
+        display: grid;
+        gap: 10px;
+        font-size: 12px;
+        color: #ccc;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .settings label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .settings select {
+        flex: 1;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: #e0e0e0;
+        font-size: 12px;
+        transition: all 0.2s;
+      }
+
+      .settings select:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .settings select:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .hint {
+        text-align: center;
+        font-size: 11px;
+        color: #666;
+        margin-top: 12px;
+        line-height: 1.6;
+      }
+
+      .hint kbd {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        color: #a8edea;
+        border: 1px solid rgba(168, 237, 234, 0.2);
+      }
+
+      #permission-warning {
+        display: none;
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        border-left: 3px solid #ff6b6b;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 12px;
+        font-size: 12px;
+        color: #ff8787;
+      }
+
+      #permission-warning.show {
+        display: block;
+      }
+
+      #stats {
+        display: none;
+        background: rgba(168, 237, 234, 0.08);
+        border: 1px solid rgba(168, 237, 234, 0.2);
+        border-left: 3px solid #a8edea;
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: #a8edea;
+        text-align: center;
+      }
+
+      #stats.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window-header" id="drag-handle">🎬 Screen Recorder</div>
+    <h1>🎬 Quick Settings</h1>
+
+    <div id="permission-warning">⚠️ Missing screen capture permissions</div>
+
+    <div id="status">Ready</div>
+    <div id="timer">00:00</div>
+
+    <div class="settings">
+      <label>
+        Format
+        <select id="format-select">
+          <option value="webm">WebM</option>
+          <option value="mp4">MP4</option>
+        </select>
+      </label>
+      <label>
+        Quality
+        <select id="quality-select">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </label>
+      <label>
+        FPS
+        <select id="fps-select">
+          <option value="30" selected>30</option>
+          <option value="60">60</option>
+          <option value="120">120</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="button-group">
+      <button id="btn">⏺ Start Recording</button>
+    </div>
+    <button id="reset-btn">🔄 Reset (if stuck)</button>
+
+    <div id="stats"></div>
+
+    <div class="hint">
+      💡 Close this popup while recording - it continues in the background<br />
+      Use <kbd>Ctrl+Shift+V</kbd> anytime for quick control
+    </div>
+
+    <script type="module" src="popup.js"></script>
+  </body>
 </html>

@@ -22,11 +22,13 @@ A lightweight Chrome extension for recording your screen with audio support. Per
 ## Usage
 
 ### Open Launcher
+
 Click the ScreenSnap extension icon in the toolbar to open the launcher:
 
 ![Open Launcher](imgs/img1.png)
 
 ### Start Recording
+
 - Press `Ctrl+Shift+V` (Windows/Linux) or `Cmd+Shift+V` (Mac)
 - Or click "Start" button in the launcher
 - Select the screen or window you want to record
@@ -34,6 +36,7 @@ Click the ScreenSnap extension icon in the toolbar to open the launcher:
 ![Start Recording](imgs/img2.png)
 
 ### Stop Recording
+
 - Press the keyboard shortcut again, or
 - Click the Stop button in the interface
 - Your recording will be automatically saved
@@ -87,9 +90,9 @@ ScreenSnap requests the following permissions:
 
 ## Keyboard Shortcuts
 
-| Action | Windows/Linux | macOS |
-|--------|---|---|
-| Toggle Recording | Ctrl+Shift+V | Cmd+Shift+V |
+| Action           | Windows/Linux | macOS       |
+| ---------------- | ------------- | ----------- |
+| Toggle Recording | Ctrl+Shift+V  | Cmd+Shift+V |
 
 ## Localization
 
@@ -103,15 +106,18 @@ The extension automatically detects your browser language and displays the appro
 ## Troubleshooting
 
 **Recording won't start:**
+
 - Ensure you have granted the necessary permissions
 - Try reloading the extension
 - Check if another extension is blocking screen capture
 
 **No audio in recording:**
+
 - Verify your microphone is enabled and working
 - Check permission settings for audio recording
 
 **Large file sizes:**
+
 - Consider using a lower quality setting in Options
 - Shorter recordings produce smaller files
 

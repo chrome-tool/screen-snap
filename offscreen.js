@@ -1,36 +1,36 @@
-import { CONFIG } from './config.js';
+import { CONFIG } from "./config.js";
 import {
   isValidMimeType,
   formatFileSize,
   generateFilename,
   isValidBlob,
-  getBestSupportedMimeType
-} from './utils.js';
+  getBestSupportedMimeType,
+} from "./utils.js";
 
 let mediaRecorder = null;
 let stream = null;
 let recordedChunks = [];
 let startTime = null;
-let currentMimeType = 'video/webm';
+let currentMimeType = "video/webm";
 let isStartingRecording = false; // Prevent concurrent startRecording calls
 const MIME_TYPE_CACHE = new Map();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'start-recording') {
+  if (message.action === "start-recording") {
     startRecording(message)
       .then(() => sendResponse({ success: true }))
       .catch((error) => {
-        console.error('Start recording error:', error);
+        console.error("Start recording error:", error);
         sendResponse({ success: false, error: error.message || String(error) });
       });
     return true;
   }
 
-  if (message.action === 'stop-recording') {
+  if (message.action === "stop-recording") {
     stopRecording()
       .then((duration) => sendResponse({ success: true, duration }))
       .catch((error) => {
-        console.error('Stop recording error:', error);
+        console.error("Stop recording error:", error);
         sendResponse({ success: false, error: error.message || String(error) });
       });
     return true;
@@ -50,17 +50,17 @@ function getMimeType(format = CONFIG.DEFAULT_FORMAT) {
   }
 
   let result;
-  if (format === 'mp4') {
+  if (format === "mp4") {
     result = CONFIG.MIME_TYPES.mp4;
   } else {
     const candidates = [
       CONFIG.MIME_TYPES.webm_vp9,
       CONFIG.MIME_TYPES.webm_vp8,
-      CONFIG.MIME_TYPES.webm
+      CONFIG.MIME_TYPES.webm,
     ];
     result = getBestSupportedMimeType(candidates);
   }
-  
+
   MIME_TYPE_CACHE.set(cacheKey, result);
   return result;
 }
@@ -71,15 +71,20 @@ function getMimeType(format = CONFIG.DEFAULT_FORMAT) {
  * @param {number} fps - Frames per second
  * @returns {Object} Video constraints
  */
-function getVideoConstraints(quality = CONFIG.DEFAULT_QUALITY, fps = CONFIG.DEFAULT_FPS) {
-  const presets = CONFIG.QUALITY_PRESETS[quality] || CONFIG.QUALITY_PRESETS[CONFIG.DEFAULT_QUALITY];
+function getVideoConstraints(
+  quality = CONFIG.DEFAULT_QUALITY,
+  fps = CONFIG.DEFAULT_FPS,
+) {
+  const presets =
+    CONFIG.QUALITY_PRESETS[quality] ||
+    CONFIG.QUALITY_PRESETS[CONFIG.DEFAULT_QUALITY];
   return {
     frameRate: fps,
     cursor: CONFIG.CURSOR_MODE,
     width: presets.width,
     height: presets.height,
     displaySurface: CONFIG.DISPLAY_SURFACE,
-    logicalSurface: true
+    logicalSurface: true,
   };
 }
 
@@ -91,12 +96,15 @@ function getVideoConstraints(quality = CONFIG.DEFAULT_QUALITY, fps = CONFIG.DEFA
  */
 async function startRecording(message = {}) {
   // Prevent concurrent startRecording calls
-  if (isStartingRecording || (mediaRecorder && mediaRecorder.state !== 'inactive')) {
+  if (
+    isStartingRecording ||
+    (mediaRecorder && mediaRecorder.state !== "inactive")
+  ) {
     throw new Error(CONFIG.ERRORS.ALREADY_RECORDING);
   }
-  
+
   isStartingRecording = true;
-  
+
   const format = message.format || CONFIG.DEFAULT_FORMAT;
   const quality = message.quality || CONFIG.DEFAULT_QUALITY;
   const fps = Number(message.fps || CONFIG.DEFAULT_FPS);
@@ -107,14 +115,14 @@ async function startRecording(message = {}) {
       audio: {
         echoCancellation: CONFIG.ECHO_CANCELLATION,
         noiseSuppression: CONFIG.NOISE_SUPPRESSION,
-        sampleRate: CONFIG.SAMPLE_RATE
+        sampleRate: CONFIG.SAMPLE_RATE,
       },
-      preferCurrentTab: false
+      preferCurrentTab: false,
     });
 
     recordedChunks = [];
     currentMimeType = getMimeType(format);
-    
+
     if (!isValidMimeType(currentMimeType)) {
       throw new Error(`Unsupported MIME type: ${currentMimeType}`);
     }
@@ -128,7 +136,7 @@ async function startRecording(message = {}) {
     };
 
     mediaRecorder.onerror = (event) => {
-      console.error('MediaRecorder error:', event.error);
+      console.error("MediaRecorder error:", event.error);
       cleanupRecorder();
     };
 
@@ -138,22 +146,22 @@ async function startRecording(message = {}) {
 
     mediaRecorder.start(CONFIG.CHUNK_INTERVAL);
     startTime = Date.now();
-    
+
     // Detect when user clicks "Stop share" - automatically stop recording
     stream.getTracks().forEach((track) => {
       track.onended = () => {
-        console.log('Stream track ended by user (Stop share clicked)');
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        console.log("Stream track ended by user (Stop share clicked)");
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
           mediaRecorder.stop();
         }
       };
     });
-    
-    console.log('Recording started with', {
+
+    console.log("Recording started with", {
       format,
       quality,
       fps,
-      mimeType: currentMimeType
+      mimeType: currentMimeType,
     });
   } catch (error) {
     isStartingRecording = false;
@@ -161,7 +169,7 @@ async function startRecording(message = {}) {
     throw error;
   } finally {
     // Mark completion only after mediaRecorder is fully initialized
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
       isStartingRecording = false;
     }
   }
@@ -173,14 +181,16 @@ async function startRecording(message = {}) {
  */
 function stopRecording() {
   return new Promise((resolve) => {
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") {
       resolve(0);
       return;
     }
 
     mediaRecorder.onstop = () => {
       void finalizeRecording().finally(() => {
-        const duration = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+        const duration = startTime
+          ? Math.floor((Date.now() - startTime) / 1000)
+          : 0;
         resolve(duration);
       });
     };
@@ -189,7 +199,7 @@ function stopRecording() {
       mediaRecorder.requestData();
       mediaRecorder.stop();
     } catch (error) {
-      console.error('Failed to stop recording:', error);
+      console.error("Failed to stop recording:", error);
       cleanupRecorder();
       resolve(0);
     }
@@ -204,21 +214,23 @@ async function finalizeRecording() {
   try {
     await saveVideo();
   } catch (error) {
-    console.error('Finalize recording failed:', error);
+    console.error("Finalize recording failed:", error);
   } finally {
     cleanupRecorder();
-    
+
     // Notify background that recording has ended
     // (could be due to user clicking "Stop share", reaching time limit, or error)
     try {
-      chrome.runtime.sendMessage({
-        action: 'recording-completed',
-        timestamp: Date.now()
-      }).catch(() => {
-        // Background might not be listening, that's ok
-      });
+      chrome.runtime
+        .sendMessage({
+          action: "recording-completed",
+          timestamp: Date.now(),
+        })
+        .catch(() => {
+          // Background might not be listening, that's ok
+        });
     } catch (e) {
-      console.warn('Failed to notify background of recording completion:', e);
+      console.warn("Failed to notify background of recording completion:", e);
     }
   }
 }
@@ -233,7 +245,7 @@ function cleanupRecorder() {
       try {
         track.stop();
       } catch (e) {
-        console.warn('Error stopping track:', e);
+        console.warn("Error stopping track:", e);
       }
     });
     stream = null;
@@ -252,7 +264,7 @@ async function saveVideo() {
   }
 
   const blob = new Blob(recordedChunks, { type: currentMimeType });
-  
+
   // Validate blob
   if (!isValidBlob(blob)) {
     if (blob.size === 0) {
@@ -261,35 +273,37 @@ async function saveVideo() {
     if (blob.size > CONFIG.MAX_FILE_SIZE_BYTES) {
       throw new Error(CONFIG.ERRORS.FILE_TOO_LARGE);
     }
-    throw new Error('Invalid blob');
+    throw new Error("Invalid blob");
   }
 
-  const extension = currentMimeType.includes('mp4') ? 'mp4' : 'webm';
+  const extension = currentMimeType.includes("mp4") ? "mp4" : "webm";
   const filename = generateFilename(extension);
   const fileSize = formatFileSize(blob.size);
 
   try {
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
-    
+
     try {
       document.body.appendChild(link);
       link.click();
       console.log(`Video saved: ${filename} (${fileSize})`);
-      
+
       // Send statistics to popup
-      await chrome.runtime.sendMessage({
-        action: 'recording-saved',
-        fileSize: blob.size,
-        filename,
-        duration: Math.floor((Date.now() - startTime) / 1000)
-      }).catch(() => {
-        // Popup might not be open, silently ignore
-        console.log('Could not send statistics (popup not open)');
-      });
-      
+      await chrome.runtime
+        .sendMessage({
+          action: "recording-saved",
+          fileSize: blob.size,
+          filename,
+          duration: Math.floor((Date.now() - startTime) / 1000),
+        })
+        .catch(() => {
+          // Popup might not be open, silently ignore
+          console.log("Could not send statistics (popup not open)");
+        });
+
       return true;
     } finally {
       document.body.removeChild(link);
@@ -297,7 +311,7 @@ async function saveVideo() {
       URL.revokeObjectURL(url);
     }
   } catch (error) {
-    console.error('Download error:', error);
+    console.error("Download error:", error);
     throw error;
   }
 }
