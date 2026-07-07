@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ScreenSnap",
+  "name": "__MSG_appName__",
   "version": "1.0.0",
-  "description": "Screen recorder - full screen with audio, runs in background",
+  "description": "__MSG_appDescription__",
   "permissions": [
     "tabCapture",
     "desktopCapture",
@@ -33,8 +33,7 @@
       "16": "icon.png",
       "48": "icon.png",
       "128": "icon.png"
-    },
-    "default_title": "ScreenSnap - Screen Recorder"
+    }
   },
   "icons": {
     "16": "icon.png",
