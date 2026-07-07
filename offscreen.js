@@ -12,6 +12,7 @@ let stream = null;
 let recordedChunks = [];
 let startTime = null;
 let currentMimeType = 'video/webm';
+let isStartingRecording = false; // Prevent concurrent startRecording calls
 const MIME_TYPE_CACHE = new Map();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -89,10 +90,13 @@ function getVideoConstraints(quality = CONFIG.DEFAULT_QUALITY, fps = CONFIG.DEFA
  * @throws {Error} If recording cannot start
  */
 async function startRecording(message = {}) {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+  // Prevent concurrent startRecording calls
+  if (isStartingRecording || (mediaRecorder && mediaRecorder.state !== 'inactive')) {
     throw new Error(CONFIG.ERRORS.ALREADY_RECORDING);
   }
-
+  
+  isStartingRecording = true;
+  
   const format = message.format || CONFIG.DEFAULT_FORMAT;
   const quality = message.quality || CONFIG.DEFAULT_QUALITY;
   const fps = Number(message.fps || CONFIG.DEFAULT_FPS);
@@ -152,8 +156,14 @@ async function startRecording(message = {}) {
       mimeType: currentMimeType
     });
   } catch (error) {
+    isStartingRecording = false;
     cleanupRecorder();
     throw error;
+  } finally {
+    // Mark completion only after mediaRecorder is fully initialized
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      isStartingRecording = false;
+    }
   }
 }
 
@@ -217,6 +227,7 @@ async function finalizeRecording() {
  * Cleans up recorder resources
  */
 function cleanupRecorder() {
+  isStartingRecording = false;
   if (stream) {
     stream.getTracks().forEach((track) => {
       try {

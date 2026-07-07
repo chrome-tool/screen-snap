@@ -3,6 +3,11 @@ import { sendMessageWithTimeout } from './utils.js';
 
 console.log('Background service worker started');
 
+// Prevent concurrent window opening operations
+let isOpeningWindow = false;
+// Track the current launcher window ID
+let launcherWindowId = null;
+
 chrome.runtime.onInstalled.addListener(() => {
   void restoreState();
   void setupContextMenu();
@@ -14,6 +19,16 @@ chrome.runtime.onStartup.addListener(() => {
 
 chrome.action.onClicked.addListener(() => {
   void openRecorderWindow();
+});
+
+/**
+ * Listen for window closed events to clean up launcher window tracking
+ */
+chrome.windows.onRemoved.addListener((windowId) => {
+  if (windowId === launcherWindowId) {
+    console.log(`Launcher window closed (ID: ${windowId}), clearing tracker`);
+    launcherWindowId = null;
+  }
 });
 
 /**
@@ -186,8 +201,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Popup might not be open
     }
     
-    return false;
+    return true; // Prevent other listeners from handling this message
   }
+  return false; // Allow other listeners to handle other messages
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -235,37 +251,49 @@ async function restoreState() {
  * @returns {Promise<void>}
  */
 async function openRecorderWindow() {
+  // Prevent concurrent window opening (quick double clicks)
+  if (isOpeningWindow) {
+    console.log('Window opening already in progress, ignoring duplicate request');
+    return;
+  }
+  
+  isOpeningWindow = true;
+  
   try {
-    // Get all windows with tabs info
+    // First, check if we have a saved launcher window ID and if it's still valid
+    if (launcherWindowId !== null) {
+      try {
+        const window = await chrome.windows.get(launcherWindowId);
+        if (window) {
+          console.log(`Launcher window still exists (ID: ${launcherWindowId}), focusing it`);
+          await chrome.windows.update(launcherWindowId, {
+            focused: true,
+            state: 'normal'
+          });
+          console.log('Successfully focused existing launcher window');
+          return;
+        }
+      } catch (error) {
+        console.log(`Saved window ID ${launcherWindowId} is no longer valid:`, error.message);
+        launcherWindowId = null;
+      }
+    }
+
+    // If we don't have a valid saved ID, search through all windows
+    console.log('Searching for launcher window in all open windows...');
     const allWindows = await chrome.windows.getAll({ populate: true });
     
     console.log(`Checking ${allWindows.length} windows for launcher...`);
     
-    // Log all windows for debugging
-    allWindows.forEach((win, idx) => {
-      console.log(`Window ${idx}: type=${win.type}, tabs=${win.tabs?.length || 0}`);
-      if (win.tabs && win.tabs.length > 0) {
-        win.tabs.forEach((tab, tabIdx) => {
-          console.log(`  Tab ${tabIdx}: ${tab.url}`);
-        });
-      }
-    });
-    
-    // Find existing launcher window
-    // Check for popup windows containing launcher
     let existingLauncher = null;
     for (const win of allWindows) {
       if (win.type === 'popup' && win.tabs && win.tabs.length > 0) {
-        // Check if any tab is launcher.html (handles various URL formats)
         const hasLauncher = win.tabs.some(tab => {
           if (!tab.url) return false;
-          // Check for launcher.html in various URL formats:
-          // - chrome-extension://xxx/launcher.html
-          // - file:///launcher.html
-          // - Just contains launcher.html
-          const isLauncherTab = tab.url.includes('launcher.html') || 
-                               tab.url.endsWith('launcher.html');
-          console.log(`  Checking tab: ${tab.url} -> isLauncher: ${isLauncherTab}`);
+          const isLauncherTab = tab.url.includes('launcher.html');
+          if (isLauncherTab) {
+            console.log(`Found launcher in tab: ${tab.url}`);
+          }
           return isLauncherTab;
         });
         
@@ -279,22 +307,17 @@ async function openRecorderWindow() {
 
     if (existingLauncher) {
       console.log(`Focusing existing launcher window (ID: ${existingLauncher.id})`);
-      try {
-        // Focus the existing launcher window
-        await chrome.windows.update(existingLauncher.id, { 
-          focused: true,
-          state: 'normal'
-        });
-        console.log('Successfully focused existing launcher');
-        return;
-      } catch (focusError) {
-        console.error('Failed to focus existing window, may be closed:', focusError);
-        // Window might have been closed, continue to create new one
-      }
+      launcherWindowId = existingLauncher.id;
+      await chrome.windows.update(existingLauncher.id, { 
+        focused: true,
+        state: 'normal'
+      });
+      console.log('Successfully focused existing launcher');
+      return;
     }
 
     // No existing launcher found, create a new one
-    console.log('Creating new launcher window');
+    console.log('No launcher window found, creating new one...');
     const newWindow = await chrome.windows.create({
       url: chrome.runtime.getURL('launcher.html'),
       type: 'popup',
@@ -303,9 +326,17 @@ async function openRecorderWindow() {
       focused: true,
       state: 'normal'
     });
-    console.log(`Created new launcher window (ID: ${newWindow.id})`);
+    
+    if (newWindow && newWindow.id) {
+      launcherWindowId = newWindow.id;
+      console.log(`Created new launcher window (ID: ${newWindow.id})`);
+    } else {
+      console.error('Failed to get window ID from created window');
+    }
   } catch (error) {
     console.error('Failed to open/focus launcher window:', error);
+  } finally {
+    isOpeningWindow = false;
   }
 }
 

@@ -300,7 +300,7 @@ A lightweight, high-quality screen recorder for Chrome.
 
 Built with modern web technologies for simplicity and performance.
 
-© 2024 - All rights reserved.
+© 2026 - All rights reserved.
   `;
   alert(aboutText);
 }
