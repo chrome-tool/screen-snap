@@ -12,7 +12,6 @@
     "storage",
     "contextMenus"
   ],
-  "optional_permissions": ["activeTab", "scripting"],
   "commands": {
     "toggle-recording": {
       "suggested_key": {
