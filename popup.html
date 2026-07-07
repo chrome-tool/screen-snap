@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <style>
+    html {
+      width: 700px;
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -52,6 +56,16 @@
       color: #ff4444;
       font-weight: 500;
     }
+
+    #status.warning {
+      color: #ffaa00;
+      font-weight: 500;
+    }
+
+    #status.error {
+      color: #ff6666;
+      font-weight: 500;
+    }
     
     #timer {
       text-align: center;
@@ -63,8 +77,14 @@
       min-height: 40px;
     }
     
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
     #btn {
-      width: 100%;
+      flex: 1;
       padding: 12px;
       border: none;
       border-radius: 8px;
@@ -74,34 +94,45 @@
       transition: all 0.2s;
       background: #4a6cf7;
       color: white;
-      margin-bottom: 8px;
+      position: relative;
     }
 
-    #btn.secondary {
-      background: #2f3f66;
-    }
-    
-    #btn:hover {
-      background: #5a7cf7;
-      transform: scale(1.02);
-    }
-    
-    #btn:active {
-      transform: scale(0.98);
-    }
-    
     #btn.recording {
       background: #ff4444;
     }
     
-    #btn.recording:hover {
+    #btn:hover:not(:disabled) {
+      background: #5a7cf7;
+      transform: scale(1.02);
+    }
+
+    #btn.recording:hover:not(:disabled) {
       background: #ff5555;
     }
     
-    #btn:disabled {
+    #btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    
+    #btn:disabled, #reset-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     
     #reset-btn {
@@ -114,7 +145,12 @@
       transition: all 0.2s;
       background: #333;
       color: #888;
-      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    
+    #reset-btn:hover:not(:disabled) {
+      background: #444;
+      color: #fff;
     }
 
     .settings {
@@ -140,17 +176,17 @@
       background: #222;
       color: #fff;
     }
-    
-    #reset-btn:hover {
-      background: #444;
-      color: #fff;
+
+    .settings select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
     .hint {
       text-align: center;
       font-size: 11px;
       color: #555;
-      margin-top: 12px;
+      margin-top: 8px;
       line-height: 1.5;
     }
     
@@ -161,11 +197,43 @@
       font-size: 10px;
       color: #aaa;
     }
+
+    #permission-warning {
+      display: none;
+      background: #442211;
+      border: 1px solid #664422;
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: #ffaa66;
+    }
+
+    #permission-warning.show {
+      display: block;
+    }
+
+    #stats {
+      display: none;
+      background: #222;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 12px;
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+    }
+
+    #stats.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <div class="window-header" id="drag-handle">🎬 Screen Recorder</div>
   <h1>🎬 Screen Recorder</h1>
+  
+  <div id="permission-warning">⚠️ Missing screen capture permissions</div>
   
   <div id="status">Ready</div>
   <div id="timer">00:00</div>
@@ -196,14 +264,18 @@
     </label>
   </div>
   
-  <button id="btn">Start Recording</button>
+  <div class="button-group">
+    <button id="btn">Start Recording</button>
+  </div>
   <button id="reset-btn">🔄 Reset (if stuck)</button>
+
+  <div id="stats"></div>
   
   <div class="hint">
-    💡 录制中可关闭 popup，随后再次打开继续控制<br>
-    Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> to stop
+    💡 You can close popup while recording<br>
+    <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> to stop
   </div>
 
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>

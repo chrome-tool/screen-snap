@@ -8,21 +8,42 @@
     "desktopCapture",
     "downloads",
     "offscreen",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
+  "optional_permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "commands": {
+    "toggle-recording": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+V",
+        "mac": "Command+Shift+V"
+      },
+      "description": "Start or stop screen recording"
+    }
+  },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_icon": {
       "16": "icon.png",
       "48": "icon.png",
       "128": "icon.png"
-    }
+    },
+    "default_popup": "popup.html",
+    "default_title": "ScreenSnap - Screen Recorder"
   },
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
-  }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
+  },
+  "default_locale": "en_US"
 }

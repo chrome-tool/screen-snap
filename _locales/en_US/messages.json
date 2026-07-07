@@ -1,0 +1,150 @@
+{
+  "appName": {
+    "message": "ScreenSnap",
+    "description": "Application name"
+  },
+  "appDescription": {
+    "message": "Screen recorder - full screen with audio, runs in background",
+    "description": "Application description"
+  },
+  "appTitle": {
+    "message": "ScreenSnap - Screen Recorder",
+    "description": "Extension title"
+  },
+  "windowHeaderTitle": {
+    "message": "🎬 Screen Recorder",
+    "description": "Window header title"
+  },
+  "statusReady": {
+    "message": "Ready",
+    "description": "Status when ready to record"
+  },
+  "statusRecording": {
+    "message": "🔴 Recording",
+    "description": "Status when recording"
+  },
+  "statusSaving": {
+    "message": "Stopping recording...",
+    "description": "Status when saving"
+  },
+  "statusSaved": {
+    "message": "✅ Saved",
+    "description": "Status when successfully saved"
+  },
+  "statusReset": {
+    "message": "🔄 Reset",
+    "description": "Status when reset"
+  },
+  "statusStarting": {
+    "message": "Starting...",
+    "description": "Status when starting"
+  },
+  "statusStopping": {
+    "message": "Stopping...",
+    "description": "Status when stopping"
+  },
+  "statusRequesting": {
+    "message": "Requesting screen...",
+    "description": "Status when requesting screen"
+  },
+  "statusLongRecording": {
+    "message": "⚠️ Long recording - high memory",
+    "description": "Warning status for long recordings"
+  },
+  "statusMaxDuration": {
+    "message": "⏹ Max duration reached - recording stopped",
+    "description": "Status when max duration reached"
+  },
+  "statusNetworkOffline": {
+    "message": "Network offline - recording may be at risk",
+    "description": "Warning when network is offline"
+  },
+  "buttonStart": {
+    "message": "⏺ Start Recording",
+    "description": "Start recording button text"
+  },
+  "buttonStop": {
+    "message": "⏹ Stop Recording",
+    "description": "Stop recording button text"
+  },
+  "buttonReset": {
+    "message": "🔄 Reset (if stuck)",
+    "description": "Reset button text"
+  },
+  "formatLabel": {
+    "message": "Format",
+    "description": "Format selection label"
+  },
+  "qualityLabel": {
+    "message": "Quality",
+    "description": "Quality selection label"
+  },
+  "fpsLabel": {
+    "message": "FPS",
+    "description": "FPS selection label"
+  },
+  "formatWebM": {
+    "message": "WebM",
+    "description": "WebM format"
+  },
+  "formatMP4": {
+    "message": "MP4",
+    "description": "MP4 format"
+  },
+  "qualityHigh": {
+    "message": "High",
+    "description": "High quality"
+  },
+  "qualityMedium": {
+    "message": "Medium",
+    "description": "Medium quality"
+  },
+  "qualityLow": {
+    "message": "Low",
+    "description": "Low quality"
+  },
+  "permissionWarning": {
+    "message": "⚠️ Missing screen capture permissions",
+    "description": "Warning when permissions are missing"
+  },
+  "hint": {
+    "message": "💡 You can close popup while recording",
+    "description": "Hint text"
+  },
+  "hintKeyboard": {
+    "message": "Press Ctrl + Shift + R to stop",
+    "description": "Keyboard shortcut hint"
+  },
+  "statsLabel": {
+    "message": "📊 Saved: {{fileSize}} | Duration: {{duration}}",
+    "description": "Statistics display"
+  },
+  "errorUnknown": {
+    "message": "Unknown error",
+    "description": "Default error message"
+  },
+  "errorAlreadyRecording": {
+    "message": "Already recording",
+    "description": "Error when trying to start while already recording"
+  },
+  "errorFailedStart": {
+    "message": "Failed to start recording",
+    "description": "Error when recording fails to start"
+  },
+  "errorFailedStop": {
+    "message": "Failed to stop recording",
+    "description": "Error when recording fails to stop"
+  },
+  "errorPermissionDenied": {
+    "message": "Permission denied - screen capture not allowed",
+    "description": "Error when permission is denied"
+  },
+  "errorOffscreenUnavailable": {
+    "message": "Offscreen document unavailable",
+    "description": "Error when offscreen document is unavailable"
+  },
+  "errorMessageTimeout": {
+    "message": "Message timeout",
+    "description": "Error when message times out"
+  }
+}

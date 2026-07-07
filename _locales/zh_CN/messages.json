@@ -1,0 +1,150 @@
+{
+  "appName": {
+    "message": "ScreenSnap",
+    "description": "应用名称"
+  },
+  "appDescription": {
+    "message": "全屏录制工具 - 支持音频，在后台运行",
+    "description": "应用描述"
+  },
+  "appTitle": {
+    "message": "ScreenSnap - 屏幕录制工具",
+    "description": "扩展标题"
+  },
+  "windowHeaderTitle": {
+    "message": "🎬 屏幕录制",
+    "description": "窗口标题"
+  },
+  "statusReady": {
+    "message": "就绪",
+    "description": "就绪状态"
+  },
+  "statusRecording": {
+    "message": "🔴 录制中",
+    "description": "录制状态"
+  },
+  "statusSaving": {
+    "message": "停止录制中...",
+    "description": "保存状态"
+  },
+  "statusSaved": {
+    "message": "✅ 已保存",
+    "description": "保存成功状态"
+  },
+  "statusReset": {
+    "message": "🔄 重置",
+    "description": "重置状态"
+  },
+  "statusStarting": {
+    "message": "启动中...",
+    "description": "启动状态"
+  },
+  "statusStopping": {
+    "message": "停止中...",
+    "description": "停止状态"
+  },
+  "statusRequesting": {
+    "message": "请求屏幕...",
+    "description": "请求屏幕状态"
+  },
+  "statusLongRecording": {
+    "message": "⚠️ 长时间录制 - 内存占用较高",
+    "description": "长时间录制警告"
+  },
+  "statusMaxDuration": {
+    "message": "⏹ 达到最大时长 - 已停止",
+    "description": "达到最大时长"
+  },
+  "statusNetworkOffline": {
+    "message": "网络离线 - 录制可能受影响",
+    "description": "网络离线警告"
+  },
+  "buttonStart": {
+    "message": "⏺ 开始录制",
+    "description": "开始录制按钮"
+  },
+  "buttonStop": {
+    "message": "⏹ 停止录制",
+    "description": "停止录制按钮"
+  },
+  "buttonReset": {
+    "message": "🔄 重置（如卡住）",
+    "description": "重置按钮"
+  },
+  "formatLabel": {
+    "message": "格式",
+    "description": "格式标签"
+  },
+  "qualityLabel": {
+    "message": "质量",
+    "description": "质量标签"
+  },
+  "fpsLabel": {
+    "message": "帧率",
+    "description": "帧率标签"
+  },
+  "formatWebM": {
+    "message": "WebM",
+    "description": "WebM 格式"
+  },
+  "formatMP4": {
+    "message": "MP4",
+    "description": "MP4 格式"
+  },
+  "qualityHigh": {
+    "message": "高",
+    "description": "高质量"
+  },
+  "qualityMedium": {
+    "message": "中",
+    "description": "中等质量"
+  },
+  "qualityLow": {
+    "message": "低",
+    "description": "低质量"
+  },
+  "permissionWarning": {
+    "message": "⚠️ 缺少屏幕录制权限",
+    "description": "权限缺失警告"
+  },
+  "hint": {
+    "message": "💡 录制时可关闭弹窗继续录制",
+    "description": "提示文本"
+  },
+  "hintKeyboard": {
+    "message": "按 Ctrl + Shift + R 停止录制",
+    "description": "键盘快捷键提示"
+  },
+  "statsLabel": {
+    "message": "📊 已保存: {{fileSize}} | 时长: {{duration}}",
+    "description": "统计信息显示"
+  },
+  "errorUnknown": {
+    "message": "未知错误",
+    "description": "默认错误信息"
+  },
+  "errorAlreadyRecording": {
+    "message": "已在录制",
+    "description": "已在录制时的错误"
+  },
+  "errorFailedStart": {
+    "message": "启动录制失败",
+    "description": "启动失败错误"
+  },
+  "errorFailedStop": {
+    "message": "停止录制失败",
+    "description": "停止失败错误"
+  },
+  "errorPermissionDenied": {
+    "message": "权限被拒绝 - 不允许屏幕录制",
+    "description": "权限被拒绝错误"
+  },
+  "errorOffscreenUnavailable": {
+    "message": "离屏文档不可用",
+    "description": "离屏文档不可用错误"
+  },
+  "errorMessageTimeout": {
+    "message": "消息超时",
+    "description": "消息超时错误"
+  }
+}
